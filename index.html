@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZIDA AI VIDEO</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #080b12;
+      color: white;
+    }
+
+    header {
+      background: #101722;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid #263244;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 30px;
+      color: #00d084;
+    }
+
+    header p {
+      color: #aeb8c7;
+      margin-bottom: 0;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: auto;
+      padding: 25px 18px;
+    }
+
+    .card {
+      background: #111824;
+      border: 1px solid #293548;
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    textarea,
+    input,
+    select {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid #35445a;
+      background: #080d15;
+      color: white;
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      background: #00c875;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #00a962;
+    }
+
+    .result {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      border-radius: 12px;
+      background: #172235;
+      margin-top: 20px;
+    }
+
+    .commission {
+      color: #00d084;
+      font-weight: bold;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      color: #7f8b9d;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>🎬 ZIDA AI VIDEO</h1>
+    <p>Crée tes vidéos avec l'intelligence artificielle</p>
+  </header>
+
+  <main class="container">
+
+    <div class="card">
+      <h2>🚀 Créer une vidéo</h2>
+
+      <label for="prompt">Décris ta vidéo</label>
+
+      <textarea
+        id="prompt"
+        placeholder="Exemple : Une voiture de luxe roule dans une ville futuriste la nuit..."
+      ></textarea>
+
+      <label for="style">Style de vidéo</label>
+
+      <select id="style">
+        <option>Cinématique</option>
+        <option>Réaliste</option>
+        <option>Animation</option>
+        <option>Publicité</option>
+        <option>Documentaire</option>
+      </select>
+
+      <label for="duration">Durée</label>
+
+      <select id="duration">
+        <option>5 secondes</option>
+        <option>10 secondes</option>
+        <option>15 secondes</option>
+        <option>30 secondes</option>
+      </select>
+
+      <button onclick="createVideo()">
+        ✨ Générer ma vidéo
+      </button>
+
+      <div class="result" id="result">
+        <h3>✅ Demande reçue !</h3>
+        <p id="message"></p>
+        <p class="commission">
+          ZIDA AI VIDEO — système de commissions prévu
