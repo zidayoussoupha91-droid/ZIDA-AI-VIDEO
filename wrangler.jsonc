@@ -1,6 +1,14 @@
 {
+  "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "zida-ai-video",
+  "main": "worker.js",
   "compatibility_date": "2026-09-04",
+
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS"
+  },
+
   "ai": {
     "binding": "AI"
   }
