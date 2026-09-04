@@ -46,7 +46,8 @@ export default {
       return new Response(
         JSON.stringify({
           success: true,
-          video: result.video
+          video: result.video,
+          result: result
         }),
         {
           headers: {
