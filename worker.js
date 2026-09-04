@@ -1,6 +1,5 @@
 export default {
   async fetch(request, env) {
-
     if (request.method !== "POST") {
       return new Response(
         JSON.stringify({
@@ -47,8 +46,7 @@ export default {
       return new Response(
         JSON.stringify({
           success: true,
-          video: result.video,
-          result: result
+          video: result.video
         }),
         {
           headers: {
@@ -58,7 +56,6 @@ export default {
       );
 
     } catch (error) {
-
       return new Response(
         JSON.stringify({
           success: false,
