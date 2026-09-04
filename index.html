@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZIDA AI VIDEO</title>
+  <title>ZIDA AI VIDÉO</title>
 
   <style>
     * {
@@ -21,36 +21,32 @@
       background: #101722;
       padding: 20px;
       text-align: center;
-      border-bottom: 1px solid #263244;
+      border-bottom: 1px solid #273142;
     }
 
     header h1 {
       margin: 0;
-      font-size: 30px;
-      color: #00d084;
+      font-size: 28px;
     }
 
     header p {
+      margin: 8px 0 0;
       color: #aeb8c7;
-      margin-bottom: 0;
     }
 
-    .container {
-      max-width: 650px;
-      margin: auto;
-      padding: 25px 18px;
+    main {
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px;
     }
 
-    .card {
-      background: #111824;
-      border: 1px solid #293548;
-      border-radius: 18px;
-      padding: 22px;
-      margin-bottom: 20px;
-    }
-
-    h2 {
-      margin-top: 0;
+    .box {
+      background: #111925;
+      border: 1px solid #273142;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 18px;
     }
 
     label {
@@ -60,16 +56,16 @@
     }
 
     textarea,
-    input,
-    select {
+    select,
+    input[type="file"] {
       width: 100%;
       padding: 14px;
       border-radius: 10px;
-      border: 1px solid #35445a;
-      background: #080d15;
+      border: 1px solid #354154;
+      background: #0b111b;
       color: white;
       font-size: 16px;
-      margin-bottom: 15px;
+      margin-bottom: 18px;
     }
 
     textarea {
@@ -77,40 +73,68 @@
       resize: vertical;
     }
 
+    .formats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .format {
+      padding: 14px;
+      border: 1px solid #354154;
+      border-radius: 10px;
+      background: #0b111b;
+      color: white;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .format.active {
+      border-color: #35c76f;
+      background: #123b26;
+    }
+
     button {
       width: 100%;
-      padding: 15px;
-      border: none;
-      border-radius: 10px;
-      background: #00c875;
-      color: white;
+      padding: 16px;
+      border: 0;
+      border-radius: 12px;
+      background: #35c76f;
+      color: #07110a;
       font-size: 17px;
       font-weight: bold;
       cursor: pointer;
     }
 
-    button:hover {
-      background: #00a962;
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
     }
 
-    .result {
-      display: none;
-      text-align: center;
-      padding: 20px;
+    #resultat {
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    video {
+      width: 100%;
       border-radius: 12px;
-      background: #172235;
-      margin-top: 20px;
+      margin-top: 15px;
+      background: black;
     }
 
-    .commission {
-      color: #00d084;
-      font-weight: bold;
+    .small {
+      color: #9da8b8;
+      font-size: 13px;
     }
 
-    footer {
-      text-align: center;
-      padding: 25px;
-      color: #7f8b9d;
+    .error {
+      color: #ff7777;
+    }
+
+    .success {
+      color: #65e58f;
     }
   </style>
 </head>
@@ -118,47 +142,243 @@
 <body>
 
   <header>
-    <h1>🎬 ZIDA AI VIDEO</h1>
-    <p>Crée tes vidéos avec l'intelligence artificielle</p>
+    <h1>🎬 ZIDA AI VIDÉO</h1>
+    <p>Crée ta vidéo avec l'intelligence artificielle</p>
   </header>
 
-  <main class="container">
+  <main>
 
-    <div class="card">
-      <h2>🚀 Créer une vidéo</h2>
-
-      <label for="prompt">Décris ta vidéo</label>
+    <div class="box">
+      <label for="prompt">📝 Décris ta vidéo</label>
 
       <textarea
         id="prompt"
-        placeholder="Exemple : Une voiture de luxe roule dans une ville futuriste la nuit..."
+        placeholder="Exemple : Une belle ville africaine au coucher du soleil, avec des voitures et des personnes qui marchent..."
       ></textarea>
 
-      <label for="style">Style de vidéo</label>
+      <label for="style">🎨 Style</label>
 
       <select id="style">
-        <option>Cinématique</option>
-        <option>Réaliste</option>
-        <option>Animation</option>
-        <option>Publicité</option>
-        <option>Documentaire</option>
+        <option value="cinematic">Cinématique</option>
+        <option value="realistic">Réaliste</option>
+        <option value="animation">Animation</option>
+        <option value="anime">Anime</option>
+        <option value="documentary">Documentaire</option>
       </select>
 
-      <label for="duration">Durée</label>
+      <label for="photo">🖼️ Photo (facultatif)</label>
+
+      <input
+        id="photo"
+        type="file"
+        accept="image/*"
+      >
+
+      <label>📱 Format</label>
+
+      <div class="formats">
+        <div
+          id="formatVertical"
+          class="format active"
+          onclick="choisirFormat('9:16')"
+        >
+          📱 Vertical<br>
+          <span class="small">9:16</span>
+        </div>
+
+        <div
+          id="formatHorizontal"
+          class="format"
+          onclick="choisirFormat('16:9')"
+        >
+          🖥️ Horizontal<br>
+          <span class="small">16:9</span>
+        </div>
+      </div>
+
+      <label for="duration">⏱️ Durée du clip</label>
 
       <select id="duration">
-        <option>5 secondes</option>
-        <option>10 secondes</option>
-        <option>15 secondes</option>
-        <option>30 secondes</option>
+        <option value="6">6 secondes</option>
+        <option value="8">8 secondes</option>
+        <option value="10">10 secondes</option>
+        <option value="12">12 secondes</option>
+        <option value="14">14 secondes</option>
+        <option value="16">16 secondes</option>
+        <option value="18">18 secondes</option>
+        <option value="20">20 secondes</option>
       </select>
 
-      <button onclick="createVideo()">
-        ✨ Générer ma vidéo
+      <button id="generateButton" onclick="genererVideo()">
+        🎬 Générer ma vidéo
       </button>
+    </div>
 
-      <div class="result" id="result">
-        <h3>✅ Demande reçue !</h3>
-        <p id="message"></p>
-        <p class="commission">
-          ZIDA AI VIDEO — système de commissions prévu
+    <div class="box">
+      <div id="resultat">
+        Ta vidéo apparaîtra ici.
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const WORKER_URL =
+      "https://zida-ai-video.zidayoussoupha91.workers.dev";
+
+    let formatChoisi = "9:16";
+
+    function choisirFormat(format) {
+      formatChoisi = format;
+
+      document
+        .getElementById("formatVertical")
+        .classList.toggle("active", format === "9:16");
+
+      document
+        .getElementById("formatHorizontal")
+        .classList.toggle("active", format === "16:9");
+    }
+
+    async function genererVideo() {
+      const prompt = document.getElementById("prompt").value.trim();
+      const style = document.getElementById("style").value;
+      const duration = Number(
+        document.getElementById("duration").value
+      );
+
+      const resultat = document.getElementById("resultat");
+      const bouton = document.getElementById("generateButton");
+
+      if (!prompt) {
+        resultat.innerHTML =
+          '<span class="error">⚠️ Décris d’abord ta vidéo.</span>';
+        return;
+      }
+
+      bouton.disabled = true;
+
+      resultat.innerHTML =
+        "⏳ Préparation de ta vidéo...";
+
+      try {
+        const response = await fetch(
+          WORKER_URL + "/generate",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              prompt: prompt,
+              style: style,
+              aspect_ratio: formatChoisi,
+              duration: duration
+            })
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            "Le serveur a refusé la demande."
+          );
+        }
+
+        const data = await response.json();
+
+        if (!data.request_id) {
+          throw new Error(
+            "Aucun identifiant de génération reçu."
+          );
+        }
+
+        resultat.innerHTML =
+          "🎬 Génération de la vidéo en cours...<br>" +
+          "⏳ Cela peut prendre quelques instants.";
+
+        await surveillerGeneration(
+          data.request_id,
+          resultat
+        );
+
+      } catch (error) {
+        console.error(error);
+
+        resultat.innerHTML =
+          '<span class="error">❌ Impossible de lancer la génération pour le moment.</span><br><br>' +
+          '<span class="small">' +
+          error.message +
+          "</span>";
+      }
+
+      bouton.disabled = false;
+    }
+
+    async function surveillerGeneration(
+      requestId,
+      resultat
+    ) {
+      const maximum = 120;
+      let compteur = 0;
+
+      while (compteur < maximum) {
+        await attendre(3000);
+
+        const response = await fetch(
+          WORKER_URL +
+          "/status?request_id=" +
+          encodeURIComponent(requestId)
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            "Impossible de vérifier la génération."
+          );
+        }
+
+        const data = await response.json();
+
+        if (data.status === "COMPLETED") {
+
+          if (!data.video_url) {
+            throw new Error(
+              "La génération est terminée mais aucune vidéo n'a été reçue."
+            );
+          }
+
+          resultat.innerHTML =
+            '<span class="success">✅ Ta vidéo est prête !</span>' +
+            '<video controls playsinline src="' +
+            data.video_url +
+            '"></video>';
+
+          return;
+        }
+
+        if (data.status === "FAILED") {
+          throw new Error(
+            "La génération de la vidéo a échoué."
+          );
+        }
+
+        resultat.innerHTML =
+          "🎬 Génération en cours...<br>" +
+          "⏳ Veuillez patienter.";
+
+        compteur++;
+      }
+
+      throw new Error(
+        "La génération prend plus de temps que prévu."
+      );
+    }
+
+    function attendre(ms) {
+      return new Promise(
+        resolve => setTimeout(resolve, ms)
+      );
+    }
+  </script>
+
+</body>
+</html>
