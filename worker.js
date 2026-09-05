@@ -1,97 +1,71 @@
 export default {
   async fetch(request, env) {
-    const corsHeaders = {
+    const cors = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type"
     };
 
-    // CORS
     if (request.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
-        headers: corsHeaders
+        headers: cors
       });
     }
 
-    // Test du Worker
     if (request.method === "GET") {
       return new Response(
         JSON.stringify({
           success: true,
-          message: "ZIDA AI VIDEO - Wan 3.0 opérationnel"
+          message: "ZIDA AI VIDEO - Wan 3.0 OK"
         }),
         {
           status: 200,
           headers: {
-            "Content-Type": "application/json; charset=UTF-8",
-            ...corsHeaders
+            "Content-Type": "application/json",
+            ...cors
           }
         }
       );
     }
 
-    // Seulement POST pour générer
     if (request.method !== "POST") {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Méthode non autorisée."
+          error: "POST required"
         }),
         {
           status: 405,
           headers: {
-            "Content-Type": "application/json; charset=UTF-8",
-            ...corsHeaders
+            "Content-Type": "application/json",
+            ...cors
           }
         }
       );
     }
 
     try {
-      // Vérification Workers AI
       if (!env.AI) {
         return new Response(
           JSON.stringify({
             success: false,
-            error: "Workers AI n'est pas connecté à ce Worker.",
-            code: "AI_BINDING_MISSING"
+            error: "Workers AI binding missing"
           }),
           {
             status: 500,
             headers: {
-              "Content-Type": "application/json; charset=UTF-8",
-              ...corsHeaders
+              "Content-Type": "application/json",
+              ...cors
             }
           }
         );
       }
 
-      // Lecture du JSON
-      let body;
+      const body = await request.json();
 
-      try {
-        body = await request.json();
-      } catch (error) {
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: "La requête reçue n'est pas un JSON valide.",
-            code: "INVALID_JSON"
-          }),
-          {
-            status: 400,
-            headers: {
-              "Content-Type": "application/json; charset=UTF-8",
-              ...corsHeaders
-            }
-          }
-        );
-      }
-
-      // Prompt
       const prompt =
-        typeof body?.prompt === "string"
+        typeof body.prompt === "string"
           ? body.prompt.trim()
           : "";
 
@@ -99,46 +73,38 @@ export default {
         return new Response(
           JSON.stringify({
             success: false,
-            error: "Le prompt est obligatoire.",
-            code: "PROMPT_MISSING"
+            error: "Prompt missing"
           }),
           {
             status: 400,
             headers: {
-              "Content-Type": "application/json; charset=UTF-8",
-              ...corsHeaders
+              "Content-Type": "application/json",
+              ...cors
             }
           }
         );
       }
 
-      // Ratio
-      const allowedRatios = [
+      const resolution = [
+        "480P",
+        "720P",
+        "1080P"
+      ].includes(body.resolution)
+        ? body.resolution
+        : "480P";
+
+      const ratio = [
         "adaptive",
         "16:9",
         "9:16",
         "1:1",
         "4:3",
         "3:4"
-      ];
-
-      const ratio = allowedRatios.includes(body?.ratio)
+      ].includes(body.ratio)
         ? body.ratio
-        : "16:9";
+        : "adaptive";
 
-      // Résolution
-      const allowedResolutions = [
-        "480P",
-        "720P",
-        "1080P"
-      ];
-
-      const resolution = allowedResolutions.includes(body?.resolution)
-        ? body.resolution
-        : "480P";
-
-      // Durée
-      let duration = Number(body?.duration);
+      let duration = Number(body.duration);
 
       if (!Number.isFinite(duration)) {
         duration = 5;
@@ -154,79 +120,42 @@ export default {
         duration = 15;
       }
 
-      console.log("ZIDA AI VIDEO - Wan 3.0");
-      console.log("Prompt:", prompt);
-      console.log("Ratio:", ratio);
-      console.log("Resolution:", resolution);
-      console.log("Duration:", duration);
+      const result = await env.AI.run(
+        "alibaba/wan-3.0",
+        {
+          prompt: prompt,
+          resolution: resolution,
+          ratio: ratio,
+          duration: duration
+        }
+      );
 
-      // Appel Wan 3.0
-      let result;
+      console.log("WAN 3.0 RESULT:", result);
 
-      try {
-        result = await env.AI.run(
-          "alibaba/wan-3.0",
-          {
-            prompt: prompt,
-            resolution: resolution,
-            ratio: ratio,
-            duration: duration
-          }
-        );
-
-        console.log("Réponse Wan 3.0:", result);
-
-      } catch (aiError) {
-        console.error("Erreur Wan 3.0:", aiError);
-
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error:
-              aiError?.message ||
-              String(aiError) ||
-              "Erreur pendant la génération vidéo.",
-            code: "AI_RUN_ERROR"
-          }),
-          {
-            status: 500,
-            headers: {
-              "Content-Type": "application/json; charset=UTF-8",
-              ...corsHeaders
-            }
-          }
-        );
-      }
-
-      // Récupération de la vidéo
-      const video =
-        result?.result?.video ||
-        result?.video ||
-        null;
+      const video = result?.result?.video || null;
 
       if (!video) {
         return new Response(
           JSON.stringify({
             success: false,
-            error: "Wan 3.0 a répondu mais aucune vidéo n'a été trouvée.",
+            error: "No video returned by Wan 3.0",
             code: "VIDEO_MISSING",
             state: result?.state || null
           }),
           {
             status: 500,
             headers: {
-              "Content-Type": "application/json; charset=UTF-8",
-              ...corsHeaders
+              "Content-Type": "application/json",
+              ...cors
             }
           }
         );
       }
 
-      // Succès
       return new Response(
         JSON.stringify({
           success: true,
-          message: "Vidéo générée avec succès.",
+          message: "Video generated successfully",
           video: video,
           ratio: ratio,
           resolution: resolution,
@@ -235,29 +164,26 @@ export default {
         {
           status: 200,
           headers: {
-            "Content-Type": "application/json; charset=UTF-8",
-            ...corsHeaders
+            "Content-Type": "application/json",
+            ...cors
           }
         }
       );
 
     } catch (error) {
-      console.error("Erreur générale Worker:", error);
+      console.error("WAN 3.0 ERROR:", error);
 
       return new Response(
         JSON.stringify({
           success: false,
-          error:
-            error?.message ||
-            String(error) ||
-            "Une erreur inconnue est survenue.",
+          error: error?.message || String(error),
           code: "WORKER_ERROR"
         }),
         {
           status: 500,
           headers: {
-            "Content-Type": "application/json; charset=UTF-8",
-            ...corsHeaders
+            "Content-Type": "application/json",
+            ...cors
           }
         }
       );
