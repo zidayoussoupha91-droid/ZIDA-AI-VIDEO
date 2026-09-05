@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>ZIDA AI VIDÉO</title>
 
   <style>
@@ -18,108 +19,194 @@
     }
 
     header {
-      background: #101722;
-      padding: 25px 18px;
       text-align: center;
+      padding: 35px 20px 25px;
+      background: #111827;
       border-bottom: 1px solid #263244;
     }
 
     header h1 {
       margin: 0;
-      font-size: 28px;
       color: #4da3ff;
+      font-size: 38px;
     }
 
     header p {
-      margin: 8px 0 0;
-      color: #aeb8c7;
+      color: #cbd5e1;
+      font-size: 18px;
+      margin-top: 12px;
     }
 
-    .container {
-      width: 92%;
-      max-width: 700px;
-      margin: 30px auto;
+    main {
+      width: 100%;
+      max-width: 850px;
+      margin: auto;
+      padding: 25px 15px;
     }
 
     .card {
-      background: #101722;
-      border: 1px solid #263244;
-      border-radius: 18px;
-      padding: 20px;
-      margin-bottom: 20px;
+      background: #111827;
+      border: 1px solid #293548;
+      border-radius: 25px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 25px;
     }
 
     label {
       display: block;
-      margin-bottom: 10px;
+      margin-top: 18px;
+      margin-bottom: 8px;
       font-weight: bold;
+      color: #e5e7eb;
     }
 
-    textarea {
+    textarea,
+    select {
       width: 100%;
-      min-height: 150px;
-      padding: 15px;
-      border-radius: 12px;
-      border: 1px solid #344154;
+      border: 1px solid #39475c;
+      border-radius: 15px;
       background: #080b12;
       color: white;
+      padding: 15px;
       font-size: 16px;
-      resize: vertical;
       outline: none;
     }
 
-    textarea:focus {
-      border-color: #4da3ff;
+    textarea {
+      min-height: 180px;
+      resize: vertical;
+    }
+
+    textarea:focus,
+    select:focus {
+      border-color: #2388ff;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
     }
 
     button {
       width: 100%;
-      margin-top: 18px;
-      padding: 16px;
       border: none;
-      border-radius: 12px;
-      background: #1683ff;
-      color: white;
-      font-size: 17px;
+      border-radius: 15px;
+      padding: 17px;
+      margin-top: 22px;
+      font-size: 18px;
       font-weight: bold;
       cursor: pointer;
     }
 
-    button:active {
-      transform: scale(0.98);
+    #generateBtn {
+      background: #2388ff;
+      color: white;
     }
 
-    #resultat {
+    #generateBtn:disabled {
+      background: #475569;
+      cursor: wait;
+    }
+
+    #resetBtn {
+      background: #293548;
+      color: white;
+    }
+
+    .result {
       margin-top: 20px;
+    }
+
+    .loading {
+      padding: 18px;
+      border-radius: 15px;
+      background: #172033;
+      color: #93c5fd;
       text-align: center;
-      color: #c9d2df;
-      line-height: 1.5;
+    }
+
+    .success {
+      padding: 15px;
+      border-radius: 15px;
+      background: #12351f;
+      color: #86efac;
+      margin-bottom: 15px;
+    }
+
+    .error {
+      padding: 15px;
+      border-radius: 15px;
+      background: #3b1212;
+      color: #ff9b9b;
+      margin-bottom: 15px;
+      word-break: break-word;
     }
 
     video {
       width: 100%;
-      margin-top: 15px;
-      border-radius: 14px;
+      max-width: 800px;
+      display: block;
+      margin: auto;
+      border-radius: 15px;
       background: black;
     }
 
-    .success {
-      color: #43e878;
+    .video-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 15px;
     }
 
-    .error {
-      color: #ff5d5d;
+    .video-actions a {
+      text-decoration: none;
+      text-align: center;
+      padding: 14px;
+      border-radius: 12px;
+      background: #2388ff;
+      color: white;
+      font-weight: bold;
     }
 
-    .loading {
-      color: #ffd34d;
+    .video-actions a.download {
+      background: #16a34a;
+    }
+
+    .help p {
+      color: #cbd5e1;
+      line-height: 1.6;
     }
 
     footer {
       text-align: center;
-      padding: 25px;
-      color: #718096;
-      font-size: 13px;
+      padding: 30px;
+      color: #94a3b8;
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 30px;
+      }
+
+      .card {
+        padding: 18px;
+        border-radius: 20px;
+      }
+
+      .options {
+        grid-template-columns: 1fr;
+      }
+
+      .video-actions {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -131,123 +218,295 @@
     <p>Crée tes vidéos avec l'intelligence artificielle</p>
   </header>
 
-  <main class="container">
+  <main>
 
     <div class="card">
-      <label for="prompt">
-        ✍️ Décris la vidéo que tu veux créer
-      </label>
+
+      <h2>✍️ Décris la vidéo que tu veux créer</h2>
 
       <textarea
         id="prompt"
-        placeholder="Exemple : Un homme marche dans une grande ville la nuit, avec des lumières et une ambiance cinématographique..."
+        placeholder="Exemple : Une belle plage au coucher du soleil, avec des vagues douces, une lumière orange et dorée, style cinématographique réaliste."
       ></textarea>
 
-      <button onclick="genererVideo()">
+      <div class="options">
+
+        <div>
+          <label for="format">📐 Format</label>
+
+          <select id="format">
+            <option value="16:9">16:9 — Paysage</option>
+            <option value="9:16">9:16 — Vertical</option>
+            <option value="1:1">1:1 — Carré</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="duration">⏱️ Durée</label>
+
+          <select id="duration">
+            <option value="8">8 secondes</option>
+            <option value="10">10 secondes</option>
+            <option value="15">15 secondes</option>
+          </select>
+        </div>
+
+      </div>
+
+      <button id="generateBtn" onclick="genererVideo()">
         🚀 Générer la vidéo
       </button>
 
-      <div id="resultat"></div>
+      <button id="resetBtn" onclick="reinitialiser()">
+        🔄 Réinitialiser
+      </button>
+
+      <div id="resultat" class="result"></div>
+
     </div>
 
-    <div class="card">
+
+    <div class="card help">
+
       <h2>✨ Comment ça marche ?</h2>
 
       <p>1️⃣ Écris ce que tu veux voir dans la vidéo.</p>
-      <p>2️⃣ Appuie sur « Générer la vidéo ».</p>
-      <p>3️⃣ Attends la génération.</p>
-      <p>4️⃣ Ta vidéo apparaîtra ici.</p>
+
+      <p>2️⃣ Choisis ton format.</p>
+
+      <p>3️⃣ Choisis la durée.</p>
+
+      <p>4️⃣ Appuie sur « Générer la vidéo ».</p>
+
+      <p>5️⃣ Attends la génération.</p>
+
+      <p>6️⃣ Ta vidéo apparaîtra ici.</p>
+
     </div>
 
   </main>
+
 
   <footer>
     © 2026 ZIDA AI VIDÉO
   </footer>
 
+
   <script>
+
+    /*
+      ZIDA AI VIDÉO
+      Le Worker est appelé sur la même adresse que cette page.
+      Aucun API key n'est demandé ici.
+    */
+
+    const API_URL = window.location.origin;
+
+
     async function genererVideo() {
 
-      const prompt = document.getElementById("prompt").value.trim();
+      const promptElement = document.getElementById("prompt");
       const resultat = document.getElementById("resultat");
+      const bouton = document.getElementById("generateBtn");
+
+      const format = document.getElementById("format").value;
+      const duration = document.getElementById("duration").value;
+
+      const prompt = promptElement.value.trim();
+
 
       if (!prompt) {
-        resultat.innerHTML =
-          '<p class="error">❌ Écris d’abord une description.</p>';
+
+        resultat.innerHTML = `
+          <div class="error">
+            ❌ Écris d'abord une description de la vidéo.
+          </div>
+        `;
+
+        promptElement.focus();
+
         return;
       }
 
-      resultat.innerHTML =
-        '<p class="loading">⏳ Génération de la vidéo en cours...</p>';
 
-      /*
-        IMPORTANT :
-        Cette partie est l'endroit où ton API de génération
-        de vidéo devra être connectée.
+      bouton.disabled = true;
 
-        Exemple :
+      bouton.textContent = "⏳ Génération en cours...";
 
-        const response = await fetch("TON_API", {
+
+      resultat.innerHTML = `
+        <div class="loading">
+          🎬 La vidéo est en cours de génération...<br><br>
+          ⏳ Cela peut prendre un peu de temps.
+        </div>
+      `;
+
+
+      try {
+
+        /*
+          On envoie les informations au Worker.
+        */
+
+        const response = await fetch(API_URL, {
+
           method: "POST",
+
           headers: {
             "Content-Type": "application/json"
           },
+
           body: JSON.stringify({
-            prompt: prompt
+
+            prompt: prompt,
+
+            format: format,
+
+            duration: Number(duration)
+
           })
+
         });
 
-      */
 
-    
-  const reponse = await fetch(
-    "https://zida-ai-video.zidayoussoupha91.workers.dev",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        prompt: prompt
-      })
+        /*
+          On récupère la réponse du Worker.
+        */
+
+        const data = await response.json();
+
+
+        /*
+          Si le Worker renvoie une erreur.
+        */
+
+        if (!response.ok || !data.success) {
+
+          throw new Error(
+            data.error ||
+            "Le moteur de génération n'a pas répondu correctement."
+          );
+
+        }
+
+
+        /*
+          Vérification de l'adresse de la vidéo.
+        */
+
+        if (!data.video) {
+
+          throw new Error(
+            "Le moteur a répondu, mais aucune vidéo n'a été retournée."
+          );
+
+        }
+
+
+        /*
+          Affichage de la vidéo.
+        */
+
+        resultat.innerHTML = `
+
+          <div class="success">
+            ✅ Vidéo générée avec succès !
+          </div>
+
+          <video
+            controls
+            playsinline
+            preload="metadata"
+            src="${data.video}">
+          </video>
+
+          <div class="video-actions">
+
+            <a
+              href="${data.video}"
+              target="_blank"
+              rel="noopener noreferrer">
+              ▶️ Ouvrir la vidéo
+            </a>
+
+            <a
+              class="download"
+              href="${data.video}"
+              target="_blank"
+              rel="noopener noreferrer"
+              download>
+              ⬇️ Télécharger
+            </a>
+
+          </div>
+
+        `;
+
+      }
+
+      catch (error) {
+
+        console.error(error);
+
+
+        resultat.innerHTML = `
+
+          <div class="error">
+
+            ❌ <strong>Erreur de génération</strong>
+
+            <br><br>
+
+            ${escapeHtml(
+              error.message ||
+              "Une erreur inconnue est survenue."
+            )}
+
+          </div>
+
+        `;
+
+      }
+
+      finally {
+
+        bouton.disabled = false;
+
+        bouton.textContent = "🚀 Générer la vidéo";
+
+      }
+
     }
-  );
-
-  const data = await reponse.json();
-
-  if (!reponse.ok || !data.success) {
-    throw new Error(data.error || "La génération vidéo a échoué.");
-  }
-
-  resultat.innerHTML = `
-    <p class="success">✅ Vidéo générée avec succès !</p>
-    <video
-      controls
-      playsinline
-      style="width:100%;max-width:700px;border-radius:16px;margin-top:15px;"
-      src="${data.video}">
-    </video>
-    <p style="margin-top:15px;">
-      <a
-        href="${data.video}"
-        target="_blank"
-        rel="noopener">
-        📥 Ouvrir la vidéo
-      </a>
-    </p>
-  `;
-
-} catch (error) {
-  resultat.innerHTML = `
-    <p style="color:#ff6b6b;">
-      ❌ Erreur : ${error.message}
-    </p>
-  `;
-}
 
 
-      }, 1500);
+    function reinitialiser() {
+
+      document.getElementById("prompt").value = "";
+
+      document.getElementById("format").value = "16:9";
+
+      document.getElementById("duration").value = "8";
+
+      document.getElementById("resultat").innerHTML = "";
+
     }
+
+
+    /*
+      Protection simple pour éviter qu'un message d'erreur
+      soit interprété comme du HTML.
+    */
+
+    function escapeHtml(text) {
+
+      const div = document.createElement("div");
+
+      div.textContent = text;
+
+      return div.innerHTML;
+
+    }
+
   </script>
 
 </body>
