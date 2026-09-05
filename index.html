@@ -199,18 +199,56 @@
 
       */
 
-      setTimeout(() => {
+    const resultat = document.getElementById("resultat");
 
-        resultat.innerHTML = `
-          <p class="success">
-            ✅ Demande reçue !
-          </p>
+resultat.innerHTML = "<p>🎬 Génération de ta vidéo en cours...</p>";
 
-          <p>
-            La connexion à ton moteur de génération vidéo
-            doit maintenant être configurée.
-          </p>
-        `;
+try {
+  const reponse = await fetch(
+    "https://zida-ai-video.zidayoussoupha91.workers.dev",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        prompt: prompt
+      })
+    }
+  );
+
+  const data = await reponse.json();
+
+  if (!reponse.ok || !data.success) {
+    throw new Error(data.error || "La génération vidéo a échoué.");
+  }
+
+  resultat.innerHTML = `
+    <p class="success">✅ Vidéo générée avec succès !</p>
+    <video
+      controls
+      playsinline
+      style="width:100%;max-width:700px;border-radius:16px;margin-top:15px;"
+      src="${data.video}">
+    </video>
+    <p style="margin-top:15px;">
+      <a
+        href="${data.video}"
+        target="_blank"
+        rel="noopener">
+        📥 Ouvrir la vidéo
+      </a>
+    </p>
+  `;
+
+} catch (error) {
+  resultat.innerHTML = `
+    <p style="color:#ff6b6b;">
+      ❌ Erreur : ${error.message}
+    </p>
+  `;
+}
+
 
       }, 1500);
     }
