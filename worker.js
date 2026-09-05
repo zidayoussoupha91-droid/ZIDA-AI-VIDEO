@@ -142,16 +142,18 @@ export default {
       let result;
 
       try {
-        result = await env.AI.run(
-          "lightricks/ltx-2-5-fast",
-          {
-            prompt,
-            duration,
-            resolution,
-            fps: 24,
-            generate_audio: false
-          }
-        );
+  result = await env.AI.run(
+    "lightricks/ltx-2-5-fast",
+    {
+      prompt,
+      duration,
+      resolution,
+      fps: 24,
+      generate_audio: false
+    }
+  );
+
+  console.log("RÉPONSE WORKERS AI :", result);
       } catch (aiError) {
 
         return new Response(
