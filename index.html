@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>ZIDA AI VIDÉO</title>
 
   <style>
@@ -20,37 +19,35 @@
 
     header {
       text-align: center;
-      padding: 35px 20px 25px;
-      background: #111827;
-      border-bottom: 1px solid #263244;
+      padding: 35px 20px;
+      background: #101827;
+      border-bottom: 1px solid #27344a;
     }
 
     header h1 {
       margin: 0;
-      color: #4da3ff;
+      color: #3390ff;
       font-size: 38px;
     }
 
     header p {
-      color: #cbd5e1;
-      font-size: 18px;
-      margin-top: 12px;
+      color: #b8c2d1;
+      font-size: 20px;
+      margin: 12px 0 0;
     }
 
     main {
-      width: 100%;
       max-width: 850px;
-      margin: auto;
-      padding: 25px 15px;
+      margin: 30px auto;
+      padding: 20px;
     }
 
     .card {
       background: #111827;
-      border: 1px solid #293548;
+      border: 1px solid #293750;
       border-radius: 25px;
-      padding: 25px;
+      padding: 28px;
       margin-bottom: 25px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     }
 
     h2 {
@@ -60,22 +57,21 @@
 
     label {
       display: block;
-      margin-top: 18px;
-      margin-bottom: 8px;
+      margin: 20px 0 8px;
+      font-size: 18px;
       font-weight: bold;
-      color: #e5e7eb;
     }
 
     textarea,
-    select {
+    select,
+    input[type="file"] {
       width: 100%;
-      border: 1px solid #39475c;
-      border-radius: 15px;
+      border: 1px solid #34435c;
+      border-radius: 16px;
       background: #080b12;
       color: white;
-      padding: 15px;
-      font-size: 16px;
-      outline: none;
+      padding: 16px;
+      font-size: 17px;
     }
 
     textarea {
@@ -83,130 +79,105 @@
       resize: vertical;
     }
 
-    textarea:focus,
-    select:focus {
-      border-color: #2388ff;
-    }
-
-    .options {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
+    input[type="file"] {
+      padding: 12px;
     }
 
     button {
       width: 100%;
-      border: none;
-      border-radius: 15px;
-      padding: 17px;
-      margin-top: 22px;
-      font-size: 18px;
+      border: 0;
+      border-radius: 18px;
+      padding: 18px;
+      margin-top: 20px;
+      font-size: 20px;
       font-weight: bold;
       cursor: pointer;
     }
 
     #generateBtn {
-      background: #2388ff;
+      background: #2588f5;
       color: white;
     }
 
     #generateBtn:disabled {
-      background: #475569;
+      opacity: 0.6;
       cursor: wait;
     }
 
     #resetBtn {
-      background: #293548;
+      background: #29384f;
       color: white;
     }
 
-    .result {
-      margin-top: 20px;
+    .status {
+      margin-top: 25px;
+      padding: 18px;
+      border-radius: 16px;
+      display: none;
+      font-size: 17px;
+      line-height: 1.5;
     }
 
     .loading {
-      padding: 18px;
-      border-radius: 15px;
-      background: #172033;
-      color: #93c5fd;
-      text-align: center;
-    }
-
-    .success {
-      padding: 15px;
-      border-radius: 15px;
-      background: #12351f;
-      color: #86efac;
-      margin-bottom: 15px;
+      display: block;
+      background: #17263b;
+      color: #9ec9ff;
     }
 
     .error {
-      padding: 15px;
-      border-radius: 15px;
-      background: #3b1212;
-      color: #ff9b9b;
-      margin-bottom: 15px;
-      word-break: break-word;
+      display: block;
+      background: #4a1010;
+      color: #ffaaaa;
     }
 
-    video {
-      width: 100%;
-      max-width: 800px;
+    .success {
       display: block;
-      margin: auto;
-      border-radius: 15px;
+      background: #103d25;
+      color: #a8f5c2;
+    }
+
+    #resultVideo {
+      width: 100%;
+      border-radius: 18px;
+      margin-top: 20px;
+      background: black;
+      display: none;
+    }
+
+    #downloadBtn {
+      display: none;
+      background: #18a957;
+      color: white;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .preview {
+      margin-top: 15px;
+      display: none;
+      width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      border-radius: 16px;
       background: black;
     }
 
-    .video-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 15px;
+    .steps {
+      line-height: 2;
+      color: #dce5f2;
+      font-size: 17px;
     }
 
-    .video-actions a {
-      text-decoration: none;
-      text-align: center;
-      padding: 14px;
-      border-radius: 12px;
-      background: #2388ff;
-      color: white;
-      font-weight: bold;
-    }
-
-    .video-actions a.download {
-      background: #16a34a;
-    }
-
-    .help p {
-      color: #cbd5e1;
-      line-height: 1.6;
+    .small {
+      color: #94a3b8;
+      font-size: 14px;
+      margin-top: 8px;
     }
 
     footer {
       text-align: center;
       padding: 30px;
-      color: #94a3b8;
-    }
-
-    @media (max-width: 600px) {
-      header h1 {
-        font-size: 30px;
-      }
-
-      .card {
-        padding: 18px;
-        border-radius: 20px;
-      }
-
-      .options {
-        grid-template-columns: 1fr;
-      }
-
-      .video-actions {
-        grid-template-columns: 1fr;
-      }
+      color: #718096;
     }
   </style>
 </head>
@@ -220,72 +191,81 @@
 
   <main>
 
-    <div class="card">
+    <section class="card">
 
       <h2>✍️ Décris la vidéo que tu veux créer</h2>
 
-      <textarea
-        id="prompt"
-        placeholder="Exemple : Une belle plage au coucher du soleil, avec des vagues douces, une lumière orange et dorée, style cinématographique réaliste."
-      ></textarea>
+      <textarea id="prompt" placeholder="Exemple : Une belle plage en Côte d’Ivoire au coucher du soleil, avec des vagues douces et une caméra qui avance lentement.">Une belle plage au coucher du soleil, avec des vagues douces et une caméra qui avance lentement.</textarea>
 
-      <div class="options">
+      <label for="photo">🖼️ Photo de référence (optionnelle)</label>
 
-        <div>
-          <label for="format">📐 Format</label>
+      <input
+        type="file"
+        id="photo"
+        accept="image/png,image/jpeg,image/webp"
+      >
 
-          <select id="format">
-            <option value="16:9">16:9 — Paysage</option>
-            <option value="9:16">9:16 — Vertical</option>
-            <option value="1:1">1:1 — Carré</option>
-          </select>
-        </div>
+      <img id="photoPreview" class="preview" alt="Aperçu de la photo">
 
-        <div>
-          <label for="duration">⏱️ Durée</label>
+      <p class="small">
+        Tu peux créer une vidéo uniquement avec ton texte pour commencer.
+      </p>
 
-          <select id="duration">
-            <option value="8">8 secondes</option>
-            <option value="10">10 secondes</option>
-            <option value="15">15 secondes</option>
-          </select>
-        </div>
+      <label for="format">📐 Format</label>
 
-      </div>
+      <select id="format">
+        <option value="16:9">16:9 — Paysage</option>
+        <option value="9:16">9:16 — Portrait</option>
+      </select>
 
-      <button id="generateBtn" onclick="genererVideo()">
+      <label for="duration">⏱️ Durée</label>
+
+      <select id="duration">
+        <option value="8">8 secondes</option>
+      </select>
+
+      <button id="generateBtn">
         🚀 Générer la vidéo
       </button>
 
-      <button id="resetBtn" onclick="reinitialiser()">
+      <button id="resetBtn">
         🔄 Réinitialiser
       </button>
 
-      <div id="resultat" class="result"></div>
+      <div id="status" class="status"></div>
 
-    </div>
+      <video
+        id="resultVideo"
+        controls
+        playsinline
+      ></video>
 
+      <a
+        id="downloadBtn"
+        href="#"
+        target="_blank"
+        rel="noopener"
+      >
+        ⬇️ Télécharger la vidéo
+      </a>
 
-    <div class="card help">
+    </section>
+
+    <section class="card">
 
       <h2>✨ Comment ça marche ?</h2>
 
-      <p>1️⃣ Écris ce que tu veux voir dans la vidéo.</p>
+      <div class="steps">
+        <div>1️⃣ Écris ce que tu veux voir dans la vidéo.</div>
+        <div>2️⃣ Choisis le format.</div>
+        <div>3️⃣ Appuie sur « Générer la vidéo ».</div>
+        <div>4️⃣ Attends la génération.</div>
+        <div>5️⃣ Regarde et télécharge ta vidéo.</div>
+      </div>
 
-      <p>2️⃣ Choisis ton format.</p>
-
-      <p>3️⃣ Choisis la durée.</p>
-
-      <p>4️⃣ Appuie sur « Générer la vidéo ».</p>
-
-      <p>5️⃣ Attends la génération.</p>
-
-      <p>6️⃣ Ta vidéo apparaîtra ici.</p>
-
-    </div>
+    </section>
 
   </main>
-
 
   <footer>
     © 2026 ZIDA AI VIDÉO
@@ -295,217 +275,311 @@
   <script>
 
     /*
-      ZIDA AI VIDÉO
-      Le Worker est appelé sur la même adresse que cette page.
-      Aucun API key n'est demandé ici.
+      Adresse de notre Worker Cloudflare
     */
+    const WORKER_URL =
+      "https://zida-ai-video.zidayoussoupha91.workers.dev";
 
-    const API_URL = window.location.origin;
+
+    const promptInput =
+      document.getElementById("prompt");
+
+    const formatInput =
+      document.getElementById("format");
+
+    const durationInput =
+      document.getElementById("duration");
+
+    const photoInput =
+      document.getElementById("photo");
+
+    const photoPreview =
+      document.getElementById("photoPreview");
+
+    const generateBtn =
+      document.getElementById("generateBtn");
+
+    const resetBtn =
+      document.getElementById("resetBtn");
+
+    const statusBox =
+      document.getElementById("status");
+
+    const resultVideo =
+      document.getElementById("resultVideo");
+
+    const downloadBtn =
+      document.getElementById("downloadBtn");
 
 
-    async function genererVideo() {
+    /*
+      Aperçu de la photo
+    */
+    photoInput.addEventListener("change", function () {
 
-      const promptElement = document.getElementById("prompt");
-      const resultat = document.getElementById("resultat");
-      const bouton = document.getElementById("generateBtn");
+      const file = photoInput.files[0];
 
-      const format = document.getElementById("format").value;
-      const duration = document.getElementById("duration").value;
+      if (!file) {
+        photoPreview.style.display = "none";
+        photoPreview.src = "";
+        return;
+      }
 
-      const prompt = promptElement.value.trim();
+      const url = URL.createObjectURL(file);
+
+      photoPreview.src = url;
+      photoPreview.style.display = "block";
+    });
+
+
+    /*
+      Afficher un message
+    */
+    function showStatus(message, type) {
+
+      statusBox.className = "status " + type;
+      statusBox.textContent = message;
+    }
+
+
+    /*
+      Réinitialiser
+    */
+    resetBtn.addEventListener("click", function () {
+
+      promptInput.value =
+        "Une belle plage au coucher du soleil, avec des vagues douces et une caméra qui avance lentement.";
+
+      formatInput.value = "16:9";
+      durationInput.value = "8";
+
+      photoInput.value = "";
+
+      photoPreview.src = "";
+      photoPreview.style.display = "none";
+
+      resultVideo.pause();
+      resultVideo.removeAttribute("src");
+      resultVideo.load();
+      resultVideo.style.display = "none";
+
+      downloadBtn.style.display = "none";
+      downloadBtn.removeAttribute("href");
+
+      statusBox.style.display = "none";
+
+      generateBtn.disabled = false;
+      generateBtn.textContent = "🚀 Générer la vidéo";
+    });
+
+
+    /*
+      Génération vidéo
+    */
+    generateBtn.addEventListener("click", async function () {
+
+      const prompt =
+        promptInput.value.trim();
+
+      const format =
+        formatInput.value;
+
+      const duration =
+        Number(durationInput.value);
 
 
       if (!prompt) {
 
-        resultat.innerHTML = `
-          <div class="error">
-            ❌ Écris d'abord une description de la vidéo.
-          </div>
-        `;
-
-        promptElement.focus();
+        showStatus(
+          "❌ Écris d'abord une description de la vidéo.",
+          "error"
+        );
 
         return;
       }
 
 
-      bouton.disabled = true;
+      /*
+        Déterminer la résolution
+      */
+      let resolution = "1280x720";
 
-      bouton.textContent = "⏳ Génération en cours...";
+      if (format === "9:16") {
+        resolution = "720x1280";
+      }
 
 
-      resultat.innerHTML = `
-        <div class="loading">
-          🎬 La vidéo est en cours de génération...<br><br>
-          ⏳ Cela peut prendre un peu de temps.
-        </div>
-      `;
+      /*
+        Bloquer le bouton pendant la génération
+      */
+      generateBtn.disabled = true;
+
+      generateBtn.textContent =
+        "⏳ Génération en cours...";
+
+
+      resultVideo.style.display = "none";
+
+      downloadBtn.style.display = "none";
+
+
+      showStatus(
+        "🎬 ZIDA AI prépare ta vidéo... Cela peut prendre un peu de temps.",
+        "loading"
+      );
 
 
       try {
 
         /*
-          On envoie les informations au Worker.
+          Pour l'instant, on envoie le texte
+          et les paramètres au Worker.
         */
+        const response = await fetch(
+          WORKER_URL,
+          {
+            method: "POST",
 
-        const response = await fetch(API_URL, {
+            headers: {
+              "Content-Type": "application/json"
+            },
 
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json"
-          },
-
-          body: JSON.stringify({
-
-            prompt: prompt,
-
-            format: format,
-
-            duration: Number(duration)
-
-          })
-
-        });
+            body: JSON.stringify({
+              prompt: prompt,
+              format: format,
+              duration: duration,
+              resolution: resolution
+            })
+          }
+        );
 
 
         /*
-          On récupère la réponse du Worker.
+          Lire la réponse comme texte d'abord.
+          Cela évite l'erreur :
+          Unexpected end of JSON input
         */
+        const rawText =
+          await response.text();
 
-        const data = await response.json();
+
+        if (!rawText.trim()) {
+
+          throw new Error(
+            "Le moteur a répondu avec une réponse vide."
+          );
+        }
+
+
+        let data;
+
+        try {
+
+          data = JSON.parse(rawText);
+
+        } catch (jsonError) {
+
+          throw new Error(
+            "Réponse du moteur invalide : " +
+            rawText.substring(0, 300)
+          );
+        }
 
 
         /*
-          Si le Worker renvoie une erreur.
+          Vérifier l'erreur du Worker
         */
-
-        if (!response.ok || !data.success) {
+        if (!response.ok) {
 
           throw new Error(
             data.error ||
-            "Le moteur de génération n'a pas répondu correctement."
+            "Le serveur a rencontré une erreur."
           );
-
         }
 
 
-        /*
-          Vérification de l'adresse de la vidéo.
-        */
-
-        if (!data.video) {
+        if (!data.success) {
 
           throw new Error(
-            "Le moteur a répondu, mais aucune vidéo n'a été retournée."
+            data.error ||
+            "La génération a échoué."
           );
-
         }
 
 
         /*
-          Affichage de la vidéo.
+          Récupérer l'adresse de la vidéo
         */
+        const videoUrl =
+          data.video;
 
-        resultat.innerHTML = `
 
-          <div class="success">
-            ✅ Vidéo générée avec succès !
-          </div>
+        if (!videoUrl) {
 
-          <video
-            controls
-            playsinline
-            preload="metadata"
-            src="${data.video}">
-          </video>
+          throw new Error(
+            "Le moteur a répondu mais aucune vidéo n'a été reçue."
+          );
+        }
 
-          <div class="video-actions">
 
-            <a
-              href="${data.video}"
-              target="_blank"
-              rel="noopener noreferrer">
-              ▶️ Ouvrir la vidéo
-            </a>
+        /*
+          Afficher la vidéo
+        */
+        resultVideo.src = videoUrl;
 
-            <a
-              class="download"
-              href="${data.video}"
-              target="_blank"
-              rel="noopener noreferrer"
-              download>
-              ⬇️ Télécharger
-            </a>
+        resultVideo.style.display = "block";
 
-          </div>
+        resultVideo.load();
 
-        `;
 
-      }
+        /*
+          Bouton télécharger
+        */
+        downloadBtn.href = videoUrl;
 
-      catch (error) {
+        downloadBtn.style.display = "block";
+
+
+        showStatus(
+          "✅ Vidéo générée avec succès !",
+          "success"
+        );
+
+
+        /*
+          Faire descendre l'écran
+          vers la vidéo
+        */
+        setTimeout(function () {
+
+          resultVideo.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+          });
+
+        }, 300);
+
+
+      } catch (error) {
 
         console.error(error);
 
 
-        resultat.innerHTML = `
+        showStatus(
+          "❌ Erreur de génération : " +
+          (error.message || error),
+          "error"
+        );
 
-          <div class="error">
+      } finally {
 
-            ❌ <strong>Erreur de génération</strong>
+        generateBtn.disabled = false;
 
-            <br><br>
-
-            ${escapeHtml(
-              error.message ||
-              "Une erreur inconnue est survenue."
-            )}
-
-          </div>
-
-        `;
-
+        generateBtn.textContent =
+          "🚀 Générer la vidéo";
       }
 
-      finally {
-
-        bouton.disabled = false;
-
-        bouton.textContent = "🚀 Générer la vidéo";
-
-      }
-
-    }
-
-
-    function reinitialiser() {
-
-      document.getElementById("prompt").value = "";
-
-      document.getElementById("format").value = "16:9";
-
-      document.getElementById("duration").value = "8";
-
-      document.getElementById("resultat").innerHTML = "";
-
-    }
-
-
-    /*
-      Protection simple pour éviter qu'un message d'erreur
-      soit interprété comme du HTML.
-    */
-
-    function escapeHtml(text) {
-
-      const div = document.createElement("div");
-
-      div.textContent = text;
-
-      return div.innerHTML;
-
-    }
+    });
 
   </script>
 
