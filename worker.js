@@ -1,9 +1,6 @@
 export default {
   async fetch(request, env) {
 
-    // =========================
-    // CORS
-    // =========================
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -11,7 +8,7 @@ export default {
     };
 
     // =========================
-    // OPTIONS / CORS
+    // CORS
     // =========================
     if (request.method === "OPTIONS") {
       return new Response(null, {
@@ -21,7 +18,7 @@ export default {
     }
 
     // =========================
-    // POST uniquement
+    // TEST DU WORKER
     // =========================
     if (request.method !== "POST") {
       return new Response(
@@ -42,7 +39,27 @@ export default {
     try {
 
       // =========================
-      // Lire la demande
+      // VÉRIFIER LA LIAISON AI
+      // =========================
+      if (!env.AI) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: "Workers AI n'est pas connecté à ce Worker.",
+            code: "AI_BINDING_MISSING"
+          }),
+          {
+            status: 500,
+            headers: {
+              "Content-Type": "application/json; charset=UTF-8",
+              ...corsHeaders
+            }
+          }
+        );
+      }
+
+      // =========================
+      // LIRE LA REQUÊTE
       // =========================
       let body;
 
@@ -52,30 +69,8 @@ export default {
         return new Response(
           JSON.stringify({
             success: false,
-            error: "La requête reçue n'est pas un JSON valide."
-          }),
-          {
-            status: 400,
-            headers: {
-              "Content-Type": "application/json; charset=UTF-8",
-              ...corsHeaders
-            }
-          }
-        );
-      }
-
-      const prompt = body?.prompt;
-      const format = body?.format || "16:9";
-      const duration = Number(body?.duration) || 8;
-
-      // =========================
-      // Vérifier le prompt
-      // =========================
-      if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: "Le prompt est obligatoire."
+            error: "La requête reçue n'est pas un JSON valide.",
+            code: "INVALID_JSON"
           }),
           {
             status: 400,
@@ -88,13 +83,85 @@ export default {
       }
 
       // =========================
-      // Vérifier Workers AI
+      // RÉCUPÉRER LES PARAMÈTRES
       // =========================
-      if (!env.AI) {
+      const prompt =
+        typeof body?.prompt === "string"
+          ? body.prompt.trim()
+          : "";
+
+      const format =
+        body?.format === "9:16"
+          ? "9:16"
+          : "16:9";
+
+      let duration = Number(body?.duration);
+
+      // Le modèle accepte une durée définie.
+      // On utilise 8 secondes si aucune durée valide
+      // n'est envoyée par le site.
+      if (!Number.isFinite(duration)) {
+        duration = 8;
+      }
+
+      if (duration <= 0) {
+        duration = 8;
+      }
+
+      // =========================
+      // VÉRIFIER LE PROMPT
+      // =========================
+      if (!prompt) {
         return new Response(
           JSON.stringify({
             success: false,
-            error: "La liaison Workers AI est absente. Vérifie le binding AI dans Cloudflare."
+            error: "Le prompt est obligatoire.",
+            code: "PROMPT_MISSING"
+          }),
+          {
+            status: 400,
+            headers: {
+              "Content-Type": "application/json; charset=UTF-8",
+              ...corsHeaders
+            }
+          }
+        );
+      }
+
+      // =========================
+      // RÉSOLUTION
+      // =========================
+      const resolution =
+        format === "9:16"
+          ? "720x1280"
+          : "1280x720";
+
+      // =========================
+      // APPEL DU MODÈLE VIDÉO
+      // =========================
+      let result;
+
+      try {
+        result = await env.AI.run(
+          "lightricks/ltx-2-5-fast",
+          {
+            prompt,
+            duration,
+            resolution,
+            fps: 24,
+            generate_audio: false
+          }
+        );
+      } catch (aiError) {
+
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error:
+              aiError?.message ||
+              String(aiError) ||
+              "Erreur pendant l'appel du moteur vidéo IA.",
+            code: "AI_RUN_ERROR"
           }),
           {
             status: 500,
@@ -107,30 +174,7 @@ export default {
       }
 
       // =========================
-      // Résolution selon le format
-      // =========================
-      let resolution = "1280x720";
-
-      if (format === "9:16") {
-        resolution = "720x1280";
-      }
-
-      // =========================
-      // Génération vidéo IA
-      // =========================
-      const result = await env.AI.run(
-        "lightricks/ltx-2-5-fast",
-        {
-          prompt: prompt.trim(),
-          duration: duration,
-          resolution: resolution,
-          fps: 24,
-          generate_audio: false
-        }
-      );
-
-      // =========================
-      // Récupérer l'URL vidéo
+      // RÉCUPÉRER LA VIDÉO
       // =========================
       const video =
         result?.result?.video ||
@@ -138,14 +182,18 @@ export default {
         null;
 
       // =========================
-      // Aucune vidéo reçue
+      // SI PAS DE VIDÉO
       // =========================
       if (!video) {
+
         return new Response(
           JSON.stringify({
             success: false,
-            error: "Le moteur IA a répondu, mais aucune vidéo n'a été retournée.",
-            details: result
+            error:
+              "Le moteur IA a terminé sa réponse mais aucune URL vidéo n'a été trouvée.",
+            code: "VIDEO_URL_MISSING",
+            state: result?.state || null,
+            result: result || null
           }),
           {
             status: 500,
@@ -158,7 +206,7 @@ export default {
       }
 
       // =========================
-      // Succès
+      // SUCCÈS
       // =========================
       return new Response(
         JSON.stringify({
@@ -181,7 +229,7 @@ export default {
     } catch (error) {
 
       // =========================
-      // Gestion des erreurs
+      // ERREUR GÉNÉRALE
       // =========================
       return new Response(
         JSON.stringify({
@@ -189,7 +237,8 @@ export default {
           error:
             error?.message ||
             String(error) ||
-            "Une erreur inconnue est survenue."
+            "Une erreur inconnue est survenue.",
+          code: "WORKER_ERROR"
         }),
         {
           status: 500,
