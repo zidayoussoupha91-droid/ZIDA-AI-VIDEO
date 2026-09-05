@@ -1,15 +1,12 @@
 export default {
   async fetch(request, env) {
-
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type"
     };
 
-    // =========================
     // CORS
-    // =========================
     if (request.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
@@ -17,14 +14,12 @@ export default {
       });
     }
 
-    // =========================
-    // TEST DU WORKER
-    // =========================
-    if (request.method !== "POST") {
+    // Test du Worker
+    if (request.method === "GET") {
       return new Response(
         JSON.stringify({
           success: true,
-          message: "ZIDA AI VIDEO - Worker opérationnel"
+          message: "ZIDA AI VIDEO - Wan 3.0 opérationnel"
         }),
         {
           status: 200,
@@ -36,11 +31,25 @@ export default {
       );
     }
 
-    try {
+    // Seulement POST pour générer
+    if (request.method !== "POST") {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Méthode non autorisée."
+        }),
+        {
+          status: 405,
+          headers: {
+            "Content-Type": "application/json; charset=UTF-8",
+            ...corsHeaders
+          }
+        }
+      );
+    }
 
-      // =========================
-      // VÉRIFIER LA LIAISON AI
-      // =========================
+    try {
+      // Vérification Workers AI
       if (!env.AI) {
         return new Response(
           JSON.stringify({
@@ -58,9 +67,7 @@ export default {
         );
       }
 
-      // =========================
-      // LIRE LA REQUÊTE
-      // =========================
+      // Lecture du JSON
       let body;
 
       try {
@@ -82,35 +89,12 @@ export default {
         );
       }
 
-      // =========================
-      // RÉCUPÉRER LES PARAMÈTRES
-      // =========================
+      // Prompt
       const prompt =
         typeof body?.prompt === "string"
           ? body.prompt.trim()
           : "";
 
-      const format =
-        body?.format === "9:16"
-          ? "9:16"
-          : "16:9";
-
-      let duration = Number(body?.duration);
-
-      // Le modèle accepte une durée définie.
-      // On utilise 8 secondes si aucune durée valide
-      // n'est envoyée par le site.
-      if (!Number.isFinite(duration)) {
-        duration = 8;
-      }
-
-      if (duration <= 0) {
-        duration = 8;
-      }
-
-      // =========================
-      // VÉRIFIER LE PROMPT
-      // =========================
       if (!prompt) {
         return new Response(
           JSON.stringify({
@@ -128,33 +112,72 @@ export default {
         );
       }
 
-      // =========================
-      // RÉSOLUTION
-      // =========================
-      const resolution =
-        format === "9:16"
-          ? "720x1280"
-          : "1280x720";
+      // Ratio
+      const allowedRatios = [
+        "adaptive",
+        "16:9",
+        "9:16",
+        "1:1",
+        "4:3",
+        "3:4"
+      ];
 
-      // =========================
-      // APPEL DU MODÈLE VIDÉO
-      // =========================
+      const ratio = allowedRatios.includes(body?.ratio)
+        ? body.ratio
+        : "16:9";
+
+      // Résolution
+      const allowedResolutions = [
+        "480P",
+        "720P",
+        "1080P"
+      ];
+
+      const resolution = allowedResolutions.includes(body?.resolution)
+        ? body.resolution
+        : "480P";
+
+      // Durée
+      let duration = Number(body?.duration);
+
+      if (!Number.isFinite(duration)) {
+        duration = 5;
+      }
+
+      duration = Math.round(duration);
+
+      if (duration < 1) {
+        duration = 1;
+      }
+
+      if (duration > 15) {
+        duration = 15;
+      }
+
+      console.log("ZIDA AI VIDEO - Wan 3.0");
+      console.log("Prompt:", prompt);
+      console.log("Ratio:", ratio);
+      console.log("Resolution:", resolution);
+      console.log("Duration:", duration);
+
+      // Appel Wan 3.0
       let result;
 
       try {
-  result = await env.AI.run(
-    "lightricks/ltx-2-5-fast",
-    {
-      prompt,
-      duration,
-      resolution,
-      fps: 24,
-      generate_audio: false
-    }
-  );
+        result = await env.AI.run(
+          "alibaba/wan-3.0",
+          {
+            prompt: prompt,
+            resolution: resolution,
+            ratio: ratio,
+            duration: duration
+          }
+        );
 
-  console.log("RÉPONSE WORKERS AI :", result);
+        console.log("Réponse Wan 3.0:", result);
+
       } catch (aiError) {
+        console.error("Erreur Wan 3.0:", aiError);
 
         return new Response(
           JSON.stringify({
@@ -162,7 +185,7 @@ export default {
             error:
               aiError?.message ||
               String(aiError) ||
-              "Erreur pendant l'appel du moteur vidéo IA.",
+              "Erreur pendant la génération vidéo.",
             code: "AI_RUN_ERROR"
           }),
           {
@@ -175,27 +198,19 @@ export default {
         );
       }
 
-      // =========================
-      // RÉCUPÉRER LA VIDÉO
-      // =========================
+      // Récupération de la vidéo
       const video =
         result?.result?.video ||
         result?.video ||
         null;
 
-      // =========================
-      // SI PAS DE VIDÉO
-      // =========================
       if (!video) {
-
         return new Response(
           JSON.stringify({
             success: false,
-            error:
-              "Le moteur IA a terminé sa réponse mais aucune URL vidéo n'a été trouvée.",
-            code: "VIDEO_URL_MISSING",
-            state: result?.state || null,
-            result: result || null
+            error: "Wan 3.0 a répondu mais aucune vidéo n'a été trouvée.",
+            code: "VIDEO_MISSING",
+            state: result?.state || null
           }),
           {
             status: 500,
@@ -207,17 +222,15 @@ export default {
         );
       }
 
-      // =========================
-      // SUCCÈS
-      // =========================
+      // Succès
       return new Response(
         JSON.stringify({
           success: true,
           message: "Vidéo générée avec succès.",
           video: video,
-          format: format,
-          duration: duration,
-          resolution: resolution
+          ratio: ratio,
+          resolution: resolution,
+          duration: duration
         }),
         {
           status: 200,
@@ -229,10 +242,8 @@ export default {
       );
 
     } catch (error) {
+      console.error("Erreur générale Worker:", error);
 
-      // =========================
-      // ERREUR GÉNÉRALE
-      // =========================
       return new Response(
         JSON.stringify({
           success: false,
