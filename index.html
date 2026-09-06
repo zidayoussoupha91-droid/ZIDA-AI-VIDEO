@@ -1,587 +1,859 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZIDA AI VIDÉO</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZIDA AI VIDÉO</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
+*{box-sizing:border-box}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #080b12;
-      color: white;
-    }
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#080b12;
+color:white;
+}
 
-    header {
-      text-align: center;
-      padding: 35px 20px;
-      background: #101827;
-      border-bottom: 1px solid #27344a;
-    }
+header{
+padding:28px 18px;
+text-align:center;
+background:#101827;
+border-bottom:1px solid #26334a;
+}
 
-    header h1 {
-      margin: 0;
-      color: #3390ff;
-      font-size: 38px;
-    }
+h1{
+margin:0;
+color:#2d8cff;
+font-size:32px;
+}
 
-    header p {
-      color: #b8c2d1;
-      font-size: 20px;
-      margin: 12px 0 0;
-    }
+header p{
+font-size:18px;
+color:#c9d2e3;
+}
 
-    main {
-      max-width: 850px;
-      margin: 30px auto;
-      padding: 20px;
-    }
+main{
+max-width:760px;
+margin:auto;
+padding:18px;
+}
 
-    .card {
-      background: #111827;
-      border: 1px solid #293750;
-      border-radius: 25px;
-      padding: 28px;
-      margin-bottom: 25px;
-    }
+.card{
+background:#101827;
+border:1px solid #263652;
+border-radius:24px;
+padding:20px;
+margin-bottom:18px;
+}
 
-    h2 {
-      margin-top: 0;
-      font-size: 25px;
-    }
+label{
+display:block;
+font-weight:bold;
+font-size:18px;
+margin:16px 0 8px;
+}
 
-    label {
-      display: block;
-      margin: 20px 0 8px;
-      font-size: 18px;
-      font-weight: bold;
-    }
+textarea,select,input{
+width:100%;
+padding:15px;
+border-radius:14px;
+border:1px solid #344766;
+background:#070b12;
+color:white;
+font-size:16px;
+}
 
-    textarea,
-    select,
-    input[type="file"] {
-      width: 100%;
-      border: 1px solid #34435c;
-      border-radius: 16px;
-      background: #080b12;
-      color: white;
-      padding: 16px;
-      font-size: 17px;
-    }
+textarea{
+min-height:150px;
+resize:vertical;
+}
 
-    textarea {
-      min-height: 180px;
-      resize: vertical;
-    }
+button{
+width:100%;
+padding:16px;
+border:0;
+border-radius:15px;
+font-size:18px;
+font-weight:bold;
+margin-top:12px;
+}
 
-    input[type="file"] {
-      padding: 12px;
-    }
+.primary{
+background:#2d8cff;
+color:white;
+}
 
-    button {
-      width: 100%;
-      border: 0;
-      border-radius: 18px;
-      padding: 18px;
-      margin-top: 20px;
-      font-size: 20px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+.secondary{
+background:#293953;
+color:white;
+}
 
-    #generateBtn {
-      background: #2588f5;
-      color: white;
-    }
+.green{
+background:#19a974;
+color:white;
+}
 
-    #generateBtn:disabled {
-      opacity: 0.6;
-      cursor: wait;
-    }
+.small{
+font-size:14px;
+color:#aeb9ca;
+line-height:1.5;
+}
 
-    #resetBtn {
-      background: #29384f;
-      color: white;
-    }
+.status{
+padding:14px;
+border-radius:14px;
+background:#151f30;
+margin-top:15px;
+display:none;
+}
 
-    .status {
-      margin-top: 25px;
-      padding: 18px;
-      border-radius: 16px;
-      display: none;
-      font-size: 17px;
-      line-height: 1.5;
-    }
+video{
+width:100%;
+border-radius:16px;
+margin-top:15px;
+background:#000;
+}
 
-    .loading {
-      display: block;
-      background: #17263b;
-      color: #9ec9ff;
-    }
+.history-item{
+padding:12px;
+margin-top:10px;
+background:#0a101b;
+border-radius:12px;
+border:1px solid #263652;
+}
 
-    .error {
-      display: block;
-      background: #4a1010;
-      color: #ffaaaa;
-    }
+.badge{
+display:inline-block;
+padding:6px 10px;
+border-radius:999px;
+background:#1d2b43;
+margin:4px 3px 0 0;
+font-size:13px;
+}
 
-    .success {
-      display: block;
-      background: #103d25;
-      color: #a8f5c2;
-    }
+.row{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
 
-    #resultVideo {
-      width: 100%;
-      border-radius: 18px;
-      margin-top: 20px;
-      background: black;
-      display: none;
-    }
-
-    #downloadBtn {
-      display: none;
-      background: #18a957;
-      color: white;
-      text-decoration: none;
-      text-align: center;
-    }
-
-    .preview {
-      margin-top: 15px;
-      display: none;
-      width: 100%;
-      max-height: 300px;
-      object-fit: contain;
-      border-radius: 16px;
-      background: black;
-    }
-
-    .steps {
-      line-height: 2;
-      color: #dce5f2;
-      font-size: 17px;
-    }
-
-    .small {
-      color: #94a3b8;
-      font-size: 14px;
-      margin-top: 8px;
-    }
-
-    footer {
-      text-align: center;
-      padding: 30px;
-      color: #718096;
-    }
-  </style>
+.credit{
+font-size:22px;
+color:#7fb4ff;
+font-weight:bold;
+}
+</style>
 </head>
 
 <body>
 
-  <header>
-    <h1>🎬 ZIDA AI VIDÉO</h1>
-    <p>Crée tes vidéos avec l'intelligence artificielle</p>
-  </header>
+<header>
+<h1>🎬 ZIDA AI VIDÉO</h1>
+<p>Crée tes vidéos avec l'intelligence artificielle</p>
+</header>
 
-  <main>
+<main>
 
-    <section class="card">
+<section class="card">
 
-      <h2>✍️ Décris la vidéo que tu veux créer</h2>
+<div class="credit">
+🪙 Crédits : <span id="credits">1</span>
+</div>
 
-      <textarea id="prompt" placeholder="Exemple : Une belle plage en Côte d’Ivoire au coucher du soleil, avec des vagues douces et une caméra qui avance lentement.">Une belle plage au coucher du soleil, avec des vagues douces et une caméra qui avance lentement.</textarea>
+<p class="small">
+Les crédits servent à créer les vidéos.
+</p>
 
-      <label for="photo">🖼️ Photo de référence (optionnelle)</label>
+<button class="green" id="waveBtn">
+💳 Acheter des crédits avec Wave
+</button>
 
-      <input
-        type="file"
-        id="photo"
-        accept="image/png,image/jpeg,image/webp"
-      >
+<p class="small">
+Le paiement Wave réel sera connecté de façon sécurisée côté serveur.
+</p>
 
-      <img id="photoPreview" class="preview" alt="Aperçu de la photo">
+</section>
 
-      <p class="small">
-        Tu peux créer une vidéo uniquement avec ton texte pour commencer.
-      </p>
 
-      <label for="format">📐 Format</label>
+<section class="card">
 
-      <select id="format">
-        <option value="16:9">16:9 — Paysage</option>
-        <option value="9:16">9:16 — Portrait</option>
-      </select>
+<label for="prompt">
+✍️ Décris la vidéo que tu veux créer
+</label>
 
-      <label for="duration">⏱️ Durée</label>
+<textarea
+id="prompt"
+placeholder="Exemple : Une belle plage au coucher du soleil, avec des vagues douces et une caméra qui avance lentement."
+></textarea>
 
-      <select id="duration">
-        <option value="8">8 secondes</option>
-      </select>
 
-      <button id="generateBtn">
-        🚀 Générer la vidéo
-      </button>
+<label for="photo">
+🖼️ Photo de référence (facultative)
+</label>
 
-      <button id="resetBtn">
-        🔄 Réinitialiser
-      </button>
+<input
+id="photo"
+type="file"
+accept="image/*"
+>
 
-      <div id="status" class="status"></div>
+<p class="small">
+Tu peux choisir une photo depuis ton téléphone.
+</p>
 
-      <video
-        id="resultVideo"
-        controls
-        playsinline
-      ></video>
 
-      <a
-        id="downloadBtn"
-        href="#"
-        target="_blank"
-        rel="noopener"
-      >
-        ⬇️ Télécharger la vidéo
-      </a>
+<div class="row">
 
-    </section>
+<div>
 
-    <section class="card">
+<label for="ratio">
+📐 Format
+</label>
 
-      <h2>✨ Comment ça marche ?</h2>
+<select id="ratio">
 
-      <div class="steps">
-        <div>1️⃣ Écris ce que tu veux voir dans la vidéo.</div>
-        <div>2️⃣ Choisis le format.</div>
-        <div>3️⃣ Appuie sur « Générer la vidéo ».</div>
-        <div>4️⃣ Attends la génération.</div>
-        <div>5️⃣ Regarde et télécharge ta vidéo.</div>
-      </div>
+<option value="16:9">
+16:9 — Paysage
+</option>
 
-    </section>
+<option value="9:16">
+9:16 — Téléphone
+</option>
 
-  </main>
+<option value="1:1">
+1:1 — Carré
+</option>
 
-  <footer>
-    © 2026 ZIDA AI VIDÉO
-  </footer>
+<option value="4:3">
+4:3
+</option>
 
+<option value="3:4">
+3:4
+</option>
 
-  <script>
+</select>
 
-    /*
-      Adresse de notre Worker Cloudflare
-    */
-    const WORKER_URL =
-      "https://zida-ai-video.zidayoussoupha91.workers.dev";
+</div>
 
 
-    const promptInput =
-      document.getElementById("prompt");
+<div>
 
-    const formatInput =
-      document.getElementById("format");
+<label for="duration">
+⏱️ Durée
+</label>
 
-    const durationInput =
-      document.getElementById("duration");
+<select id="duration">
 
-    const photoInput =
-      document.getElementById("photo");
+<option value="5">
+5 secondes
+</option>
 
-    const photoPreview =
-      document.getElementById("photoPreview");
+<option value="8" selected>
+8 secondes
+</option>
 
-    const generateBtn =
-      document.getElementById("generateBtn");
+<option value="10">
+10 secondes
+</option>
 
-    const resetBtn =
-      document.getElementById("resetBtn");
+<option value="15">
+15 secondes
+</option>
 
-    const statusBox =
-      document.getElementById("status");
+</select>
 
-    const resultVideo =
-      document.getElementById("resultVideo");
+</div>
 
-    const downloadBtn =
-      document.getElementById("downloadBtn");
+</div>
 
 
-    /*
-      Aperçu de la photo
-    */
-    photoInput.addEventListener("change", function () {
+<label for="resolution">
+🎞️ Qualité
+</label>
 
-      const file = photoInput.files[0];
+<select id="resolution">
 
-      if (!file) {
-        photoPreview.style.display = "none";
-        photoPreview.src = "";
-        return;
-      }
+<option value="480P">
+480P — Test économique
+</option>
 
-      const url = URL.createObjectURL(file);
+<option value="720P">
+720P
+</option>
 
-      photoPreview.src = url;
-      photoPreview.style.display = "block";
-    });
+<option value="1080P">
+1080P
+</option>
 
+</select>
 
-    /*
-      Afficher un message
-    */
-    function showStatus(message, type) {
 
-      statusBox.className = "status " + type;
-      statusBox.textContent = message;
-    }
+<label for="voice">
+🎙️ Voix off
+</label>
 
+<select id="voice">
 
-    /*
-      Réinitialiser
-    */
-    resetBtn.addEventListener("click", function () {
+<option value="none">
+Sans voix
+</option>
 
-      promptInput.value =
-        "Une belle plage au coucher du soleil, avec des vagues douces et une caméra qui avance lentement.";
+<option value="fr-female">
+Français — voix femme
+</option>
 
-      formatInput.value = "16:9";
-      durationInput.value = "8";
+<option value="fr-male">
+Français — voix homme
+</option>
 
-      photoInput.value = "";
+</select>
 
-      photoPreview.src = "";
-      photoPreview.style.display = "none";
+<p class="small">
+La connexion réelle de la voix off sera ajoutée côté serveur.
+</p>
 
-      resultVideo.pause();
-      resultVideo.removeAttribute("src");
-      resultVideo.load();
-      resultVideo.style.display = "none";
 
-      downloadBtn.style.display = "none";
-      downloadBtn.removeAttribute("href");
+<label>
+🛡️ Règles ZIDA
+</label>
 
-      statusBox.style.display = "none";
+<p class="small">
+ZIDA refuse les demandes de contenu sexuel explicite,
+pornographique, illégal ou faisant la promotion de la violence.
+</p>
 
-      generateBtn.disabled = false;
-      generateBtn.textContent = "🚀 Générer la vidéo";
-    });
 
+<button class="primary" id="generate">
+🚀 Générer la vidéo
+</button>
 
-    /*
-      Génération vidéo
-    */
-    generateBtn.addEventListener("click", async function () {
 
-      const prompt =
-        promptInput.value.trim();
+<button class="secondary" id="reset">
+↩️ Réinitialiser
+</button>
 
-      const format =
-        formatInput.value;
 
-      const duration =
-        Number(durationInput.value);
+<div id="status" class="status"></div>
 
+</section>
 
-      if (!prompt) {
 
-        showStatus(
-          "❌ Écris d'abord une description de la vidéo.",
-          "error"
-        );
+<section class="card" id="resultCard" style="display:none">
 
-        return;
-      }
+<h2>
+🎥 Ta vidéo
+</h2>
 
+<video
+id="video"
+controls
+playsinline
+></video>
 
-      /*
-        Déterminer la résolution
-      */
-      let resolution = "1280x720";
+<button
+class="green"
+id="download"
+>
+📥 Télécharger la vidéo
+</button>
 
-      if (format === "9:16") {
-        resolution = "720x1280";
-      }
+</section>
 
 
-      /*
-        Bloquer le bouton pendant la génération
-      */
-      generateBtn.disabled = true;
+<section class="card">
 
-      generateBtn.textContent =
-        "⏳ Génération en cours...";
+<h2>
+📜 Historique
+</h2>
 
+<div id="history">
+<p class="small">
+Aucune vidéo pour le moment.
+</p>
+</div>
 
-      resultVideo.style.display = "none";
+<button
+class="secondary"
+id="clearHistory"
+>
+Effacer l'historique
+</button>
 
-      downloadBtn.style.display = "none";
+</section>
 
 
-      showStatus(
-        "🎬 ZIDA AI prépare ta vidéo... Cela peut prendre un peu de temps.",
-        "loading"
-      );
+<section class="card">
 
+<h2>
+✨ Comment ça marche ?
+</h2>
 
-      try {
+<p>1️⃣ Écris ce que tu veux voir.</p>
 
-        /*
-          Pour l'instant, on envoie le texte
-          et les paramètres au Worker.
-        */
-        const response = await fetch(
-          WORKER_URL,
-          {
-            method: "POST",
+<p>2️⃣ Choisis le format, la durée et la qualité.</p>
 
-            headers: {
-              "Content-Type": "application/json"
-            },
+<p>3️⃣ Appuie sur « Générer la vidéo ».</p>
 
-            body: JSON.stringify({
-              prompt: prompt,
-              format: format,
-              duration: duration,
-              resolution: resolution
-            })
-          }
-        );
+<p>4️⃣ Attends la génération.</p>
 
+<p>5️⃣ Regarde et télécharge ta vidéo.</p>
 
-        /*
-          Lire la réponse comme texte d'abord.
-          Cela évite l'erreur :
-          Unexpected end of JSON input
-        */
-        const rawText =
-          await response.text();
+</section>
 
+</main>
 
-        if (!rawText.trim()) {
 
-          throw new Error(
-            "Le moteur a répondu avec une réponse vide."
-          );
-        }
+<script>
 
+const WORKER_URL =
+"https://zida-ai-video.zidayoussoupha91.workers.dev";
 
-        let data;
 
-        try {
+const creditsEl =
+document.getElementById("credits");
 
-          data = JSON.parse(rawText);
+const promptEl =
+document.getElementById("prompt");
 
-        } catch (jsonError) {
+const photoEl =
+document.getElementById("photo");
 
-          throw new Error(
-            "Réponse du moteur invalide : " +
-            rawText.substring(0, 300)
-          );
-        }
+const ratioEl =
+document.getElementById("ratio");
 
+const durationEl =
+document.getElementById("duration");
 
-        /*
-          Vérifier l'erreur du Worker
-        */
-        if (!response.ok) {
+const resolutionEl =
+document.getElementById("resolution");
 
-          throw new Error(
-            data.error ||
-            "Le serveur a rencontré une erreur."
-          );
-        }
+const voiceEl =
+document.getElementById("voice");
 
+const generateBtn =
+document.getElementById("generate");
 
-        if (!data.success) {
+const statusEl =
+document.getElementById("status");
 
-          throw new Error(
-            data.error ||
-            "La génération a échoué."
-          );
-        }
+const resultCard =
+document.getElementById("resultCard");
 
+const videoEl =
+document.getElementById("video");
 
-        /*
-          Récupérer l'adresse de la vidéo
-        */
-        const videoUrl =
-          data.video;
 
+let credits =
+Number(localStorage.getItem("zida_credits") || "1");
 
-        if (!videoUrl) {
 
-          throw new Error(
-            "Le moteur a répondu mais aucune vidéo n'a été reçue."
-          );
-        }
+let history =
+JSON.parse(
+localStorage.getItem("zida_history") || "[]"
+);
 
 
-        /*
-          Afficher la vidéo
-        */
-        resultVideo.src = videoUrl;
+let currentVideoUrl = "";
 
-        resultVideo.style.display = "block";
 
-        resultVideo.load();
+function saveState(){
 
+localStorage.setItem(
+"zida_credits",
+String(credits)
+);
 
-        /*
-          Bouton télécharger
-        */
-        downloadBtn.href = videoUrl;
+localStorage.setItem(
+"zida_history",
+JSON.stringify(history)
+);
 
-        downloadBtn.style.display = "block";
+creditsEl.textContent = credits;
 
+}
 
-        showStatus(
-          "✅ Vidéo générée avec succès !",
-          "success"
-        );
 
+function showStatus(message,error=false){
 
-        /*
-          Faire descendre l'écran
-          vers la vidéo
-        */
-        setTimeout(function () {
+statusEl.style.display = "block";
 
-          resultVideo.scrollIntoView({
-            behavior: "smooth",
-            block: "center"
-          });
+statusEl.textContent = message;
 
-        }, 300);
+statusEl.style.background =
+error ? "#4a1f25" : "#151f30";
 
+}
 
-      } catch (error) {
 
-        console.error(error);
+function renderHistory(){
 
+if(!history.length){
 
-        showStatus(
-          "❌ Erreur de génération : " +
-          (error.message || error),
-          "error"
-        );
+document.getElementById("history").innerHTML =
+'<p class="small">Aucune vidéo pour le moment.</p>';
 
-      } finally {
+return;
 
-        generateBtn.disabled = false;
+}
 
-        generateBtn.textContent =
-          "🚀 Générer la vidéo";
-      }
 
-    });
+document.getElementById("history").innerHTML =
+history.map((item,index)=>`
 
-  </script>
+<div class="history-item">
+
+<strong>
+${item.prompt
+.replace(/</g,"&lt;")
+.slice(0,100)}
+</strong>
+
+<br>
+
+<span class="badge">
+${item.ratio}
+</span>
+
+<span class="badge">
+${item.duration}s
+</span>
+
+<span class="badge">
+${item.resolution}
+</span>
+
+<div class="small">
+${item.date}
+</div>
+
+<button
+class="secondary"
+onclick="openHistory(${index})"
+>
+▶️ Revoir
+</button>
+
+</div>
+
+`).join("");
+
+}
+
+
+window.openHistory = function(index){
+
+const item = history[index];
+
+if(!item || !item.video){
+return;
+}
+
+currentVideoUrl =
+item.video;
+
+videoEl.src =
+item.video;
+
+resultCard.style.display =
+"block";
+
+resultCard.scrollIntoView({
+behavior:"smooth"
+});
+
+};
+
+
+document.getElementById("waveBtn").onclick =
+function(){
+
+showStatus(
+"💳 Wave sera connecté de façon sécurisée dans le Worker. Ne mets jamais une clé Wave dans cette page."
+);
+
+};
+
+
+photoEl.onchange =
+function(){
+
+if(photoEl.files[0]){
+
+showStatus(
+"🖼️ Photo choisie. Elle pourra être utilisée avec le moteur photo-vidéo."
+);
+
+}
+
+};
+
+
+generateBtn.onclick =
+async function(){
+
+const prompt =
+promptEl.value.trim();
+
+
+if(!prompt){
+
+showStatus(
+"❌ Écris d'abord ce que tu veux voir.",
+true
+);
+
+return;
+
+}
+
+
+if(credits < 1){
+
+showStatus(
+"🪙 Tu n'as plus de crédit. Achète des crédits avec Wave.",
+true
+);
+
+return;
+
+}
+
+
+generateBtn.disabled =
+true;
+
+generateBtn.textContent =
+"⏳ Génération...";
+
+showStatus(
+"⏳ ZIDA prépare ta vidéo..."
+);
+
+
+try{
+
+const response =
+await fetch(
+WORKER_URL,
+{
+method:"POST",
+
+headers:{
+"Content-Type":
+"application/json"
+},
+
+body:JSON.stringify({
+
+prompt:prompt,
+
+ratio:ratioEl.value,
+
+duration:
+Number(durationEl.value),
+
+resolution:
+resolutionEl.value,
+
+voice:
+voiceEl.value
+
+})
+
+}
+);
+
+
+const rawText =
+await response.text();
+
+
+if(!rawText.trim()){
+
+throw new Error(
+"Le moteur a répondu avec une réponse vide."
+);
+
+}
+
+
+let data;
+
+try{
+
+data =
+JSON.parse(rawText);
+
+}
+
+catch(error){
+
+throw new Error(rawText);
+
+}
+
+
+if(!response.ok ||
+!data.success){
+
+throw new Error(
+data.error ||
+"La génération a échoué."
+);
+
+}
+
+
+if(!data.video){
+
+throw new Error(
+"Aucune vidéo n'a été retournée."
+);
+
+}
+
+
+credits--;
+
+currentVideoUrl =
+data.video;
+
+videoEl.src =
+data.video;
+
+resultCard.style.display =
+"block";
+
+
+history.unshift({
+
+prompt:prompt,
+
+ratio:
+data.ratio ||
+ratioEl.value,
+
+duration:
+data.duration ||
+Number(durationEl.value),
+
+resolution:
+data.resolution ||
+resolutionEl.value,
+
+voice:
+voiceEl.value,
+
+video:
+data.video,
+
+date:
+new Date().toLocaleString("fr-FR")
+
+});
+
+
+history =
+history.slice(0,20);
+
+saveState();
+
+showStatus(
+"✅ Vidéo créée avec succès !"
+);
+
+resultCard.scrollIntoView({
+behavior:"smooth"
+});
+
+
+}
+
+catch(error){
+
+showStatus(
+"❌ " +
+(error.message ||
+String(error)),
+true
+);
+
+}
+
+finally{
+
+generateBtn.disabled =
+false;
+
+generateBtn.textContent =
+"🚀 Générer la vidéo";
+
+}
+
+};
+
+
+document.getElementById("download").onclick =
+function(){
+
+if(!currentVideoUrl){
+
+showStatus(
+"❌ Aucune vidéo à télécharger.",
+true
+);
+
+return;
+
+}
+
+window.open(
+currentVideoUrl,
+"_blank"
+);
+
+};
+
+
+document.getElementById("reset").onclick =
+function(){
+
+promptEl.value = "";
+
+photoEl.value = "";
+
+resultCard.style.display =
+"none";
+
+videoEl.removeAttribute("src");
+
+currentVideoUrl = "";
+
+statusEl.style.display =
+"none";
+
+};
+
+
+document.getElementById("clearHistory").onclick =
+function(){
+
+history = [];
+
+saveState();
+
+renderHistory();
+
+};
+
+
+saveState();
+
+renderHistory();
+
+</script>
 
 </body>
 </html>
