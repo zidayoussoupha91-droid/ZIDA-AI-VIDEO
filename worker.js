@@ -1,15 +1,16 @@
 export default {
   async fetch(request, env) {
-    const cors = {
+    const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Headers": "Content-Type"
     };
 
+    // Autoriser les requêtes OPTIONS
     if (request.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
-        headers: cors,
+        headers: corsHeaders
       });
     }
 
@@ -18,143 +19,149 @@ export default {
       return new Response(
         JSON.stringify({
           success: true,
-          message: "ZIDA AI VIDEO - Worker connecté",
-          model: "MiniMax H3",
+          message: "ZIDA AI VIDEO - Worker connecté avec fal.ai",
+          model: "fal-ai/wan/v2.2-5b/image-to-video"
         }),
         {
           status: 200,
           headers: {
-            ...cors,
-            "Content-Type": "application/json",
-          },
+            ...corsHeaders,
+            "Content-Type": "application/json"
+          }
         }
       );
     }
 
+    // Nous acceptons uniquement POST pour générer
     if (request.method !== "POST") {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "POST requis",
+          error: "POST requis"
         }),
         {
           status: 405,
           headers: {
-            ...cors,
-            "Content-Type": "application/json",
-          },
+            ...corsHeaders,
+            "Content-Type": "application/json"
+          }
         }
       );
     }
 
     try {
-      const body = await request.json();
-
-      const prompt =
-        body.prompt ||
-        "Une scène cinématographique réaliste, mouvement de caméra doux et naturel.";
-
-      const duration = Number(body.duration || 5);
-      const ratio = body.ratio || "16:9";
-      const resolution = body.resolution || "768P";
-
-      /*
-       * Appel Cloudflare AI Gateway / AI REST API.
-       *
-       * Les informations sensibles doivent être placées
-       * dans les variables/secrets Cloudflare, jamais dans GitHub.
-       */
-      if (!env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_API_TOKEN) {
+      // Vérifier la clé fal.ai
+      if (!env.ZIDA_AI_KEY) {
         return new Response(
           JSON.stringify({
             success: false,
-            error:
-              "Configuration manquante : CLOUDFLARE_ACCOUNT_ID ou CLOUDFLARE_API_TOKEN.",
+            error: "ZIDA_AI_KEY est manquante dans Cloudflare."
           }),
           {
             status: 500,
             headers: {
-              ...cors,
-              "Content-Type": "application/json",
-            },
+              ...corsHeaders,
+              "Content-Type": "application/json"
+            }
           }
         );
       }
 
-      const url =
-        `https://api.cloudflare.com/client/v4/accounts/` +
-        `${env.CLOUDFLARE_ACCOUNT_ID}/ai/run`;
+      const body = await request.json();
 
-      const aiResponse = await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
-          "cf-aig-gateway-id": "default",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "minimax/h3",
-          input: {
-            content: [
-              {
-                type: "text",
-                text: prompt,
-              },
-            ],
-            duration,
-            ratio,
-            resolution,
-          },
-        }),
-      });
+      const prompt =
+        body.prompt ||
+        "A cinematic realistic video with natural movement.";
 
-      const result = await aiResponse.json();
+      const imageUrl = body.image_url || body.imageUrl;
 
-      if (!aiResponse.ok) {
+      if (!imageUrl) {
         return new Response(
           JSON.stringify({
             success: false,
-            error: "Erreur du moteur vidéo Cloudflare",
-            details: result,
+            error: "image_url est obligatoire."
           }),
           {
-            status: aiResponse.status,
+            status: 400,
             headers: {
-              ...cors,
-              "Content-Type": "application/json",
-            },
+              ...corsHeaders,
+              "Content-Type": "application/json"
+            }
           }
         );
       }
 
+      // Modèle vidéo peu coûteux pour notre premier test
+      const model = "fal-ai/wan/v2.2-5b/image-to-video";
+
+      // Envoyer la génération à la file fal.ai
+      const falResponse = await fetch(
+        `https://queue.fal.run/${model}`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Key ${env.ZIDA_AI_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            image_url: imageUrl,
+            prompt: prompt
+          })
+        }
+      );
+
+      const result = await falResponse.json();
+
+      if (!falResponse.ok) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: "Erreur fal.ai",
+            details: result
+          }),
+          {
+            status: falResponse.status,
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "application/json"
+            }
+          }
+        );
+      }
+
+      // fal.ai renvoie normalement un request_id
       return new Response(
         JSON.stringify({
           success: true,
-          message: "Génération vidéo lancée avec succès",
-          result,
+          message: "Génération vidéo lancée",
+          model: model,
+          request_id: result.request_id,
+          status_url: result.status_url,
+          response_url: result.response_url
         }),
         {
           status: 200,
           headers: {
-            ...cors,
-            "Content-Type": "application/json",
-          },
+            ...corsHeaders,
+            "Content-Type": "application/json"
+          }
         }
       );
+
     } catch (error) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: error?.message || "Erreur inconnue du Worker",
+          error: error?.message || "Erreur inconnue"
         }),
         {
           status: 500,
           headers: {
-            ...cors,
-            "Content-Type": "application/json",
-          },
+            ...corsHeaders,
+            "Content-Type": "application/json"
+          }
         }
       );
     }
-  },
+  }
 };
