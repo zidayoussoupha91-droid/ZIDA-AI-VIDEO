@@ -31,16 +31,17 @@ export default {
       });
     }
 
-    // Test GET
+    // TEST GET
     if (request.method === "GET") {
       return json({
         success: true,
-        message: "ZIDA AI VIDEO - Worker connecté à fal.ai",
-        model: MODEL
+        message: "ZIDA AI VIDEO - Worker connecté",
+        model: MODEL,
+        fal_configured: !!env.ZIDA_AI_KEY
       });
     }
 
-    // Seulement POST pour générer
+    // POST uniquement
     if (request.method !== "POST") {
       return json({
         success: false,
@@ -48,36 +49,32 @@ export default {
       }, 405);
     }
 
+    // Vérification de la clé
+    if (!env.ZIDA_AI_KEY) {
+      return json({
+        success: false,
+        error: "ZIDA_AI_KEY est manquante dans Cloudflare"
+      }, 500);
+    }
+
     try {
-      // Vérification de la clé
-      if (!env.ZIDA_AI_KEY) {
-        return json({
-          success: false,
-          error: "ZIDA_AI_KEY est manquante dans Cloudflare."
-        }, 500);
-      }
 
       const body = await request.json();
 
       const prompt =
         body.prompt ||
-        "Une scène réaliste et naturelle, mouvement doux de la caméra, animation fluide.";
+        "Animation cinématique naturelle, mouvement doux de la caméra, mouvement réaliste du sujet.";
 
-      const imageUrl =
-        body.image_url ||
-        body.imageUrl ||
-        body.image;
+      const imageUrl = body.imageUrl || body.image_url;
 
       if (!imageUrl) {
         return json({
           success: false,
-          error: "image_url est obligatoire."
+          error: "imageUrl est obligatoire"
         }, 400);
       }
 
-      /*
-       * 1. ENVOI À LA FILE FAL.AI
-       */
+      // 1. ENVOI À LA FILE FAL.AI
       const submitResponse = await fetch(
         `https://queue.fal.run/${MODEL}`,
         {
@@ -97,174 +94,159 @@ export default {
 
       const submitText = await submitResponse.text();
 
-      let submitResult = {};
+      let submitData;
+
       try {
-        submitResult = submitText ? JSON.parse(submitText) : {};
+        submitData = JSON.parse(submitText);
       } catch {
-        submitResult = {
-          raw: submitText
-        };
+        return json({
+          success: false,
+          error: "Réponse fal.ai invalide lors de l'envoi",
+          status: submitResponse.status,
+          details: submitText
+        }, 502);
       }
 
       if (!submitResponse.ok) {
         return json({
           success: false,
-          error: "fal.ai a refusé la demande.",
+          error: "fal.ai a refusé la demande",
           status: submitResponse.status,
-          details: submitResult
+          details: submitData
         }, submitResponse.status);
       }
 
-      const requestId = submitResult.request_id;
+      const requestId = submitData.request_id;
 
       if (!requestId) {
         return json({
           success: false,
-          error: "fal.ai n'a pas renvoyé de request_id.",
-          details: submitResult
+          error: "fal.ai n'a pas fourni de request_id",
+          details: submitData
         }, 502);
       }
 
-      /*
-       * 2. VÉRIFICATION DE LA FILE
-       *
-       * On vérifie pendant environ 25 secondes.
-       */
-      const statusUrl =
-        `https://queue.fal.run/${MODEL}/requests/${requestId}/status`;
+      // 2. ATTENDRE LA FIN DE LA GÉNÉRATION
+      let statusData = null;
 
-      const resultUrl =
-        `https://queue.fal.run/${MODEL}/requests/${requestId}`;
+      for (let i = 0; i < 25; i++) {
 
-      for (let i = 0; i < 10; i++) {
+        await sleep(2000);
 
-        await sleep(2500);
-
-        const statusResponse = await fetch(statusUrl, {
-          method: "GET",
-          headers: {
-            "Authorization": `Key ${env.ZIDA_AI_KEY}`
-          }
-        });
-
-        const statusText = await statusResponse.text();
-
-        let statusResult = {};
-        try {
-          statusResult = statusText
-            ? JSON.parse(statusText)
-            : {};
-        } catch {
-          statusResult = {
-            raw: statusText
-          };
-        }
-
-        if (!statusResponse.ok) {
-          return json({
-            success: false,
-            error: "Impossible de vérifier le statut fal.ai.",
-            status: statusResponse.status,
-            details: statusResult,
-            request_id: requestId
-          }, statusResponse.status);
-        }
-
-        const status = statusResult.status;
-
-        /*
-         * Génération terminée
-         */
-        if (status === "COMPLETED") {
-
-          const resultResponse = await fetch(resultUrl, {
+        const statusResponse = await fetch(
+          `https://queue.fal.run/${MODEL}/requests/${requestId}/status`,
+          {
             method: "GET",
             headers: {
               "Authorization": `Key ${env.ZIDA_AI_KEY}`
             }
-          });
-
-          const resultText = await resultResponse.text();
-
-          let result = {};
-          try {
-            result = resultText
-              ? JSON.parse(resultText)
-              : {};
-          } catch {
-            result = {
-              raw: resultText
-            };
           }
+        );
 
-          if (!resultResponse.ok) {
-            return json({
-              success: false,
-              error: "La génération est terminée mais le résultat n'a pas pu être récupéré.",
-              request_id: requestId,
-              details: result
-            }, resultResponse.status);
-          }
+        const statusText = await statusResponse.text();
 
-          const videoUrl =
-            result?.video?.url ||
-            result?.data?.video?.url ||
-            result?.response?.video?.url;
-
-          if (!videoUrl) {
-            return json({
-              success: false,
-              error: "La génération est terminée mais aucune URL vidéo n'a été trouvée.",
-              request_id: requestId,
-              details: result
-            }, 502);
-          }
-
-          return json({
-            success: true,
-            message: "🎉 Vidéo générée avec succès !",
-            model: MODEL,
-            request_id: requestId,
-            video_url: videoUrl
-          });
-        }
-
-        /*
-         * Erreur de génération
-         */
-        if (
-          status === "FAILED" ||
-          status === "ERROR"
-        ) {
+        try {
+          statusData = JSON.parse(statusText);
+        } catch {
           return json({
             success: false,
-            error: "fal.ai a échoué pendant la génération.",
+            error: "Réponse de statut fal.ai invalide",
+            details: statusText
+          }, 502);
+        }
+
+        if (statusData.status === "COMPLETED") {
+          break;
+        }
+
+        if (statusData.status === "FAILED") {
+          return json({
+            success: false,
+            error: "La génération fal.ai a échoué",
             request_id: requestId,
-            status: status,
-            details: statusResult
+            details: statusData
           }, 502);
         }
       }
 
-      /*
-       * Si la vidéo prend plus de temps,
-       * on renvoie le request_id au site.
-       */
+      if (!statusData || statusData.status !== "COMPLETED") {
+        return json({
+          success: false,
+          error: "La génération prend trop de temps. Réessaie dans quelques instants.",
+          request_id: requestId,
+          status: statusData
+        }, 504);
+      }
+
+      // 3. RÉCUPÉRER LE VRAI RÉSULTAT
+      const resultResponse = await fetch(
+        `https://queue.fal.run/${MODEL}/requests/${requestId}`,
+        {
+          method: "GET",
+          headers: {
+            "Authorization": `Key ${env.ZIDA_AI_KEY}`
+          }
+        }
+      );
+
+      const resultText = await resultResponse.text();
+
+      let resultData;
+
+      try {
+        resultData = JSON.parse(resultText);
+      } catch {
+        return json({
+          success: false,
+          error: "Réponse finale fal.ai invalide",
+          details: resultText
+        }, 502);
+      }
+
+      if (!resultResponse.ok) {
+        return json({
+          success: false,
+          error: "Impossible de récupérer le résultat vidéo",
+          status: resultResponse.status,
+          details: resultData
+        }, resultResponse.status);
+      }
+
+      // 4. RÉCUPÉRER L'URL DE LA VIDÉO
+      const videoUrl =
+        resultData.video?.url ||
+        resultData.data?.video?.url ||
+        resultData.output?.video?.url;
+
+      if (!videoUrl) {
+        return json({
+          success: false,
+          error: "fal.ai a terminé mais aucune URL vidéo n'a été trouvée",
+          request_id: requestId,
+          result: resultData
+        }, 502);
+      }
+
+      // 5. SUCCÈS
       return json({
-        success: false,
-        processing: true,
-        message: "⏳ La vidéo est encore en cours de génération.",
+        success: true,
+        message: "Vidéo générée avec succès",
+        model: MODEL,
         request_id: requestId,
-        status_url: statusUrl,
-        result_url: resultUrl
-      }, 202);
+        video_url: videoUrl,
+        video: {
+          url: videoUrl
+        }
+      });
 
     } catch (error) {
 
       return json({
         success: false,
-        error: error?.message || "Erreur inconnue du Worker."
+        error: "Erreur serveur ZIDA AI VIDEO",
+        details: error?.message || String(error)
       }, 500);
+
     }
   }
 };
