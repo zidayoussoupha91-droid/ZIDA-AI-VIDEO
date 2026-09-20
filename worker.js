@@ -3,28 +3,30 @@ export default {
     const cors = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type"
+      "Access-Control-Allow-Headers": "Content-Type",
     };
 
     if (request.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
-        headers: cors
+        headers: cors,
       });
     }
 
+    // Test simple du Worker
     if (request.method === "GET") {
       return new Response(
         JSON.stringify({
           success: true,
-          message: "ZIDA AI VIDEO - Wan 3.0 OK"
+          message: "ZIDA AI VIDEO - Worker connecté",
+          model: "MiniMax H3",
         }),
         {
           status: 200,
           headers: {
+            ...cors,
             "Content-Type": "application/json",
-            ...cors
-          }
+          },
         }
       );
     }
@@ -33,121 +35,94 @@ export default {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "POST required"
+          error: "POST requis",
         }),
         {
           status: 405,
           headers: {
+            ...cors,
             "Content-Type": "application/json",
-            ...cors
-          }
+          },
         }
       );
     }
 
     try {
-      if (!env.AI) {
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: "Workers AI binding missing"
-          }),
-          {
-            status: 500,
-            headers: {
-              "Content-Type": "application/json",
-              ...cors
-            }
-          }
-        );
-      }
-
       const body = await request.json();
 
       const prompt =
-        typeof body.prompt === "string"
-          ? body.prompt.trim()
-          : "";
+        body.prompt ||
+        "Une scène cinématographique réaliste, mouvement de caméra doux et naturel.";
 
-      if (!prompt) {
+      const duration = Number(body.duration || 5);
+      const ratio = body.ratio || "16:9";
+      const resolution = body.resolution || "768P";
+
+      /*
+       * Appel Cloudflare AI Gateway / AI REST API.
+       *
+       * Les informations sensibles doivent être placées
+       * dans les variables/secrets Cloudflare, jamais dans GitHub.
+       */
+      if (!env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_API_TOKEN) {
         return new Response(
           JSON.stringify({
             success: false,
-            error: "Prompt missing"
-          }),
-          {
-            status: 400,
-            headers: {
-              "Content-Type": "application/json",
-              ...cors
-            }
-          }
-        );
-      }
-
-      const resolution = [
-        "480P",
-        "720P",
-        "1080P"
-      ].includes(body.resolution)
-        ? body.resolution
-        : "480P";
-
-      const ratio = [
-        "adaptive",
-        "16:9",
-        "9:16",
-        "1:1",
-        "4:3",
-        "3:4"
-      ].includes(body.ratio)
-        ? body.ratio
-        : "adaptive";
-
-      let duration = Number(body.duration);
-
-      if (!Number.isFinite(duration)) {
-        duration = 5;
-      }
-
-      duration = Math.round(duration);
-
-      if (duration < 1) {
-        duration = 1;
-      }
-
-      if (duration > 15) {
-        duration = 15;
-      }
-
-      const result = await env.AI.run(
-        "alibaba/wan-3.0",
-        {
-          prompt: prompt,
-          resolution: resolution,
-          ratio: ratio,
-          duration: duration
-        }
-      );
-
-      console.log("WAN 3.0 RESULT:", result);
-
-      const video = result?.result?.video || null;
-
-      if (!video) {
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: "No video returned by Wan 3.0",
-            code: "VIDEO_MISSING",
-            state: result?.state || null
+            error:
+              "Configuration manquante : CLOUDFLARE_ACCOUNT_ID ou CLOUDFLARE_API_TOKEN.",
           }),
           {
             status: 500,
             headers: {
+              ...cors,
               "Content-Type": "application/json",
-              ...cors
-            }
+            },
+          }
+        );
+      }
+
+      const url =
+        `https://api.cloudflare.com/client/v4/accounts/` +
+        `${env.CLOUDFLARE_ACCOUNT_ID}/ai/run`;
+
+      const aiResponse = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
+          "cf-aig-gateway-id": "default",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "minimax/h3",
+          input: {
+            content: [
+              {
+                type: "text",
+                text: prompt,
+              },
+            ],
+            duration,
+            ratio,
+            resolution,
+          },
+        }),
+      });
+
+      const result = await aiResponse.json();
+
+      if (!aiResponse.ok) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: "Erreur du moteur vidéo Cloudflare",
+            details: result,
+          }),
+          {
+            status: aiResponse.status,
+            headers: {
+              ...cors,
+              "Content-Type": "application/json",
+            },
           }
         );
       }
@@ -155,38 +130,31 @@ export default {
       return new Response(
         JSON.stringify({
           success: true,
-          message: "Video generated successfully",
-          video: video,
-          ratio: ratio,
-          resolution: resolution,
-          duration: duration
+          message: "Génération vidéo lancée avec succès",
+          result,
         }),
         {
           status: 200,
           headers: {
+            ...cors,
             "Content-Type": "application/json",
-            ...cors
-          }
+          },
         }
       );
-
     } catch (error) {
-      console.error("WAN 3.0 ERROR:", error);
-
       return new Response(
         JSON.stringify({
           success: false,
-          error: error?.message || String(error),
-          code: "WORKER_ERROR"
+          error: error?.message || "Erreur inconnue du Worker",
         }),
         {
           status: 500,
           headers: {
+            ...cors,
             "Content-Type": "application/json",
-            ...cors
-          }
+          },
         }
       );
     }
-  }
+  },
 };
